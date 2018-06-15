@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <!--
+        <conamename="colorPrimary">#3F51B5</color>
+        <conamename="colorPrimaryDark">#303F9F</color>
+    -->
+    <color name="colorAccent">#FF4081</color>
+
+    //--------项目要求颜色规范
+    //Primary
+    <color name="colorPrimarySky">#7ECEDE</color>
+    <color name="colorPrimaryLightSky">#EBF0F0</color>
+    <color name="colorPrimaryOrange">#FF9D47</color>
+    //Secondary
+    <color name="colorSecondaryRed">#DC334F</color>
+    <color name="colorSecondaryPink">#11F90D0D</color>
+    <color name="colorSecondaryBlue">#4097FD</color>
+    <color name="colorSecondaryGold">#BDA26D</color>
+    <color name="colorSecondaryYellow">#DBB242</color>
+    //Base
+    <color name="colorBaseBlack">#292E33</color>
+    <color name="colorBaseGrey">#888B8C</color>
+    <color name="colorBaseLightGrey">#F1F1F1</color>
+    <color name="colorBaseLightGrey50">#77DDDDDD</color>
+    <color name="colorBaseSlateGrey">#8194A6</color>
+
+    <color name="colorTransparent">#00000000</color>
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorToastBg">#dddfe0</color>
+    <color name="colorBg">#F7F7F7</color>
+    <color name="tran_colorBg">#80F7F7F7</color>
+    <color name="colorTextGrey">#989898</color>
+    <color name="colorTextGray2">#757575</color>
+    <color name="colorLine">#E5E5E5</color>
+    <color name="colorHint">#D7D7D7</color>
+    <color name="colorRed">#F90D0D</color>
+    <color name="colorTextGrep">#A4A4A4</color>
+    <color name="colorTextBlack">#313131</color>
+    <color name="colorRedBg">#FF4A4A</color>
+    <color name="colorGrayBg">#C5C5C5</color>
+    <color name="colorStart">#F24A16</color>
+    <color name="colorEnd">#BE0154</color>
+    <color name="colorTop">#FF0C78</color>
+    <color name="colorBottom">#FF4C1C</color>
+
+    //项目要求颜色规范--------
+    <color name="red_normal">#FF0000</color>
+    <color name="red_pressed">#FF6666</color>
+    <color name="green_normal">#37C000</color>
+    <color name="green_pressed">#30A070</color>
+    <color name="purple_normal">#9932CC</color>
+    <color name="purple_pressed">#9F79EE</color>
+
+</resources>
