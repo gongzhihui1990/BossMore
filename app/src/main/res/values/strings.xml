@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">商霸</string>
+    <string name="cop_name">喜来快递</string>
+    <string name="sure">确认</string>
+    <string name="cancel">取消</string>
+    <string name="cancel_loading">取消中</string>
+    <string name="loading_default">加载中</string>
+    <string name="no_data">暂无数据</string>
+    <string name="back">返回</string>
+    <string name="manage">管理</string>
+    <string name="net_set">网络设置</string>
+    <string name="system_set">设置</string>
+    <string name="hint">提示</string>
+    <string name="please_retry">请重试</string>
+    <string name="retry">重试</string>
+    <string name="tab_disable">错误页面</string>
+    <string name="hot_line">客服热线:</string>
+    <string name="hot_line_phone">021-52658180</string>
+    <string name="scan_text">将二维码放入框内，即可自动扫描</string>
+    <string name="cny">元</string>
+    <string name="commit">提交</string>
+    <string name="verify">验证</string>
+    <string name="home_page">首页</string>
+    <string name="loading">加载中...</string>
+    <string name="loaded">加载结束</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="un_define">未确定</string>
+    <string name="progress_symbol">...</string>
+
 </resources>
