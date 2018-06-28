@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import butterknife.ButterKnife
 import io.reactivex.disposables.Disposable
 import net.gtr.framework.activity.RxAppCompatActivity
 import net.gtr.framework.rx.DialogObserverHolder
@@ -41,9 +40,6 @@ abstract class RxBaseDialogFragment : DialogFragment(), DialogObserverHolder {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (container != null) {
-            ButterKnife.bind(this, container)
-        }
         return container
     }
 

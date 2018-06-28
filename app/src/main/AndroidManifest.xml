@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_app"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/FullWindowTheme">
         <activity
             android:name=".view.SplashActivity"
             android:screenOrientation="portrait"
@@ -22,5 +22,8 @@
         <activity
             android:name=".view.MainActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.PlayActivity"
+            android:screenOrientation="landscape" />
     </application>
 </manifest>

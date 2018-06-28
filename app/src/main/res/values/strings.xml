@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">商霸</string>
+    <string name="app_name">Sea Fight</string>
     <string name="cop_name">喜来快递</string>
     <string name="sure">确认</string>
     <string name="cancel">取消</string>
@@ -27,5 +27,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="un_define">未确定</string>
     <string name="progress_symbol">...</string>
+
+    <!--main home page-->
+    <string name="action_start_game">Start</string>
+    <string name="action_quit_app">Quit</string>
 
 </resources>
