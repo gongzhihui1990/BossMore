@@ -2,7 +2,9 @@ package org.gong.bmw.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import org.gong.bmw.R;
 import org.gong.bmw.control.BootController;
 
 /**
@@ -10,28 +12,25 @@ import org.gong.bmw.control.BootController;
  */
 
 public class U21 extends EnemyBoot {
-    public U21(EnemyBootCallBack enemyBootCallBack, Context context) {
-        super(enemyBootCallBack, context);
+    private static Bitmap imageCache = null;
+
+    public U21(Context context) {
+        super(context);
     }
 
     @Override
     public void init() {
-        setSpeed(Speed.L2);
+        setSpeed(Speed.L5);
     }
+
 
 
     @Override
     public Bitmap getBitmap() {
-        return null;
+        if (imageCache == null) {
+            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_sub_21);
+        }
+        return imageCache;
     }
 
-    @Override
-    public BootController getController() {
-        return null;
-    }
-
-    @Override
-    public GameItemState getGameItemState() {
-        return null;
-    }
 }

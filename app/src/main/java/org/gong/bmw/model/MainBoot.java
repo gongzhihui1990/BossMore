@@ -26,6 +26,7 @@ public final class MainBoot extends Boot {
         super.initBoot(context);
         //设置初始屏幕位置
         setPoint(new GamePoint(0.5f, 0.1f));
+        setSpeed(Speed.L5);
     }
 
     @Override
@@ -81,11 +82,11 @@ public final class MainBoot extends Boot {
                 case normal:
                     break;
                 case sendBomb:
-                    setTimes(10);
+                    setTimes(5);
                     setNextState(new MainBootState(State.loadingBomb));
                     break;
                 case loadingBomb:
-                    setTimes(30);
+                    setTimes(10);
                     setNextState(new MainBootState(State.normal));
                 default:
                     break;

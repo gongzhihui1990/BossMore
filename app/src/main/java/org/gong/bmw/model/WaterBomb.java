@@ -21,7 +21,7 @@ public class WaterBomb extends GameItemView {
     /**
      * 速度屏幕宽度千分比
      */
-    private float speed = WaterBomb.Speed.L2.speed;
+    private float speed = WaterBomb.Speed.L3.speed;
     private WaterBombState waterBombState = new WaterBombState(State.Run);
 
     public WaterBomb releaseAt(GamePoint point) {
@@ -44,7 +44,6 @@ public class WaterBomb extends GameItemView {
                 return imageCache;
         }
 
-
     }
 
     @Override
@@ -57,11 +56,15 @@ public class WaterBomb extends GameItemView {
         super.move();
         if (waterBombState.getState() == State.Run) {
             gamePoint.moveY(speed);
-            if (gamePoint.getY() >= 0.9) {
+            if (gamePoint.getY() >= 0.95) {
                 //炸到海底
-                waterBombState = new WaterBombState(State.Bomb);
+                bomb();
             }
         }
+    }
+
+    public void bomb() {
+        waterBombState = new WaterBombState(State.Bomb);
     }
 
     @Override
@@ -79,6 +82,7 @@ public class WaterBomb extends GameItemView {
     public void setGameItemState(GameItemState state) {
         waterBombState = (WaterBombState) state;
     }
+
 
     enum Speed {
         L1(0.002f), L2(0.003f), L3(0.004f), L4(0.005f), L5(0.006f);

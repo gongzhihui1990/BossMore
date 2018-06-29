@@ -20,7 +20,7 @@ public interface BootController /*extends  GameItemInterface*/{
 
 
     enum Code {
-        NewEnemy,ClearEnemy, Left, Right, Stop,ReleaseBomb;
+        NewEnemy,ClearEnemy, Left, Right, Stop,Sink,ReleaseBomb;
 
 
 //        @NonNull

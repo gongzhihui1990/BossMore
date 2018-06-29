@@ -29,7 +29,6 @@ public abstract class Boot extends GameItemView implements GameBoot {
      * 前进方向
      */
     private Direct direct = Direct.Stay;
-    private boolean shouldRemove = false;
     private UUID uuid;
     private GamePoint point = new GamePoint(0, 0);
 
@@ -37,13 +36,9 @@ public abstract class Boot extends GameItemView implements GameBoot {
         initBoot(context);
     }
 
-    public void onRemove() {
-        shouldRemove = true;
-    }
-
     @Override
     public boolean shouldRemove() {
-        return shouldRemove;
+        return false;
     }
 
     @Override
@@ -73,16 +68,28 @@ public abstract class Boot extends GameItemView implements GameBoot {
     public abstract BootController getController();
 
     protected boolean inFrame() {
-        return Boundary.Mid == getBoundary();
+        return Boundary.Mid == getBoundaryX();
     }
 
-    private Boundary getBoundary() {
+    private Boundary getBoundaryX() {
         if (point.getX() < BOUNDARY) {
             return Boundary.Left;
         }
         if (point.getX() > 1 - BOUNDARY) {
             return Boundary.Right;
         }
+
+        return Boundary.Mid;
+    }
+
+    private Boundary getBoundaryY() {
+        if (point.getY() < BOUNDARY) {
+            return Boundary.Top;
+        }
+        if (point.getY() > 1 - BOUNDARY) {
+            return Boundary.Bottom;
+        }
+
         return Boundary.Mid;
     }
 
@@ -99,6 +106,9 @@ public abstract class Boot extends GameItemView implements GameBoot {
             case Stop:
                 direct = Direct.Stay;
                 break;
+            case Sink:
+                direct = Direct.Bottom;
+                break;
             default:
                 break;
         }
@@ -113,18 +123,26 @@ public abstract class Boot extends GameItemView implements GameBoot {
                 onMoved(false);
                 break;
             case Left:
-                if (getBoundary() != Boundary.Left) {
+                if (getBoundaryX() != Boundary.Left) {
                     onMoved(true);
-                    moveBy(-speed);
+                    point.moveX(-speed);
                 } else {
                     direct = Direct.Stay;
                 }
                 break;
             case Right:
                 onMoved(true);
-                if (getBoundary() != Boundary.Right) {
+                if (getBoundaryX() != Boundary.Right) {
                     onMoved(true);
-                    moveBy(speed);
+                    point.moveX(speed);
+                } else {
+                    direct = Direct.Stay;
+                }
+                break;
+            case Bottom:
+                if (getBoundaryY() != Boundary.Bottom) {
+                    onMoved(true);
+                    point.moveY(speed / 2);
                 } else {
                     direct = Direct.Stay;
                 }
@@ -135,9 +153,6 @@ public abstract class Boot extends GameItemView implements GameBoot {
         onMoved(false);
     }
 
-    private void moveBy(float distanceHorizon) {
-        point.moveX(distanceHorizon);
-    }
 
     abstract void onMoved(boolean moved);
 
@@ -163,11 +178,11 @@ public abstract class Boot extends GameItemView implements GameBoot {
 
 
     enum Boundary {
-        Left, Mid, Right
+        Left, Mid, Right, Top, Bottom
     }
 
     public enum Direct {
-        Right(1), Stay(0), Left(-1);
+        Right(1), Stay(0), Left(-1), Bottom(3);
 
         int direct;
 

@@ -17,9 +17,10 @@ import org.gong.bmw.control.BootController;
 import org.gong.bmw.control.GameController;
 import org.gong.bmw.control.GameItemInterface;
 import org.gong.bmw.model.EnemyBoot;
-import org.gong.bmw.model.EnemyBootCallBack;
 import org.gong.bmw.model.GameItemView;
+import org.gong.bmw.model.GamePoint;
 import org.gong.bmw.model.MainBoot;
+import org.gong.bmw.model.U21;
 import org.gong.bmw.model.U26;
 import org.gong.bmw.model.WaterBomb;
 
@@ -38,7 +39,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
      * 每30帧刷新一次屏幕
      **/
     public static final int TIME_IN_FRAME = 30;
+    /**
+     * 游戏画板
+     */
     private Canvas mCanvas;
+    private int mCanvasWith;
+    private int mCanvasHigh;
     private SurfaceHolder mSurfaceHolder;
     private GameController controller;
     private boolean mIsRunning = false;
@@ -58,53 +64,38 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         mSurfaceHolder = holder;
         mIsRunning = true;
         MainBoot mainBoot = new MainBoot(getContext());
-        final EnemyBootCallBack enemyBootCallBack = new EnemyBootCallBack() {
-            @Override
-            public void fade(EnemyBoot boot) {
-                boot.onRemove();
-            }
+        final BootController proxyController = code -> {
+            synchronized (mSurfaceHolder) {
+                switch (code) {
+                    case ReleaseBomb:
+                        if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
+                            WaterBomb bomb = new WaterBomb();
+                            bomb.releaseAt(mainBoot.getPoint());
+                            mainBoot.receiveCode(BootController.Code.ReleaseBomb);
+                            gameItems.add(bomb);
+                        }
 
-            @Override
-            public void boom(EnemyBoot boot) {
-                boot.onRemove();
-            }
-        };
-        final BootController proxyController = new BootController() {
-            @Override
-            public boolean receiveCode(Code code) {
-                synchronized (mSurfaceHolder) {
-                    switch (code) {
-                        case ReleaseBomb:
-                            if (mainBoot.getGameItemState().getState() == MainBoot.State.normal){
-                                WaterBomb bomb = new WaterBomb();
-                                bomb.releaseAt(mainBoot.getPoint());
-                                mainBoot.receiveCode(Code.ReleaseBomb);
-                                gameItems.add(bomb);
+                        break;
+                    case ClearEnemy:
+                        for (GameItemView gameItemView : gameItems) {
+                            if (gameItemView instanceof EnemyBoot) {
+                                ((EnemyBoot) gameItemView).fade();
                             }
+                        }
+                        break;
+                    case NewEnemy:
+                        if (gameItems.size() > 8) {
+                            return false;
+                        }
+                        gameItems.add(new U26(getContext()));
+                        break;
 
-                            break;
-                        case ClearEnemy:
-                            for (GameItemInterface controller : gameItems) {
-                                if (controller instanceof EnemyBoot) {
-                                    enemyBootCallBack.boom((EnemyBoot) controller);
-                                }
-                            }
-                            break;
-                        case NewEnemy:
-                            if (gameItems.size() > 8) {
-                                return false;
-                            }
-                            gameItems.add(new U26(enemyBootCallBack, getContext()));
-                            break;
-
-                        default:
-                            mainBoot.receiveCode(code);
-                            break;
-                    }
+                    default:
+                        mainBoot.receiveCode(code);
+                        break;
                 }
-                return true;
             }
-
+            return true;
         };
         controller.onBootControllerPrepared(proxyController);
         gameItems.add(mainBoot);
@@ -132,7 +123,52 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             synchronized (mSurfaceHolder) {
                 switch (controller.getGameState()) {
                     case Run:
-                        moveItems();
+                        //新增敌人
+                        int enemyBootSize = 0;
+                        for (GameItemView gameItemView : gameItems) {
+                            if (gameItemView instanceof EnemyBoot) {
+                                enemyBootSize++;
+                            }
+                        }
+                        double random = Math.random();
+                        Loger.INSTANCE.d("random: " + random);
+                        if (enemyBootSize < 10 && Math.random() * 100 < 3) {
+                            gameItems.add(new U26(getContext()));
+                        }
+                        if (enemyBootSize < 10 && Math.random() * 100 < 15 && Math.random() * 100 > 10) {
+                            gameItems.add(new U21(getContext()));
+                        }
+                        //元素移动
+                        for (GameItemView itemView : gameItems) {
+                            itemView.move();
+                        }
+                        //碰撞处理
+                        List<EnemyBoot> enemyBoots = new ArrayList<>();
+                        List<WaterBomb> bombs = new ArrayList<>();
+                        for (GameItemView itemView : gameItems) {
+                            if (itemView instanceof EnemyBoot) {
+                                enemyBoots.add((EnemyBoot) itemView);
+                            }
+                            if (itemView instanceof WaterBomb) {
+                                bombs.add((WaterBomb) itemView);
+                            }
+                        }
+                        for (EnemyBoot enemyBoot : enemyBoots) {
+                            for (WaterBomb bomb : bombs) {
+                                if (crashed(enemyBoot, bomb)) {
+                                    bomb.bomb();
+                                    enemyBoot.bomb();
+                                }
+                            }
+                        }
+                        //删除无效的Boot
+                        Iterator<GameItemView> it = gameItems.iterator();
+                        while (it.hasNext()) {
+                            GameItemInterface x = it.next();
+                            if (x.shouldRemove()) {
+                                it.remove();
+                            }
+                        }
                         break;
                     case Pause:
                         //TODO
@@ -188,30 +224,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private void drawing() {
         //SurfaceView背景
         mCanvas.drawColor(Color.WHITE);
-        drawItems();
-    }
-
-    private void moveItems() {
-        for (GameItemView itemView : gameItems) {
-            itemView.move();
-        }
-        //删除无效的Boot
-        Iterator<GameItemView> it = gameItems.iterator();
-        while (it.hasNext()) {
-            GameItemInterface x = it.next();
-            if (x.shouldRemove()) {
-                it.remove();
-            }
-        }
-    }
-
-    private void drawItems() {
+        //drawItems
         for (GameItemView view : gameItems) {
-            int with = mCanvas.getWidth();
-            int height = mCanvas.getHeight();
+            mCanvasWith = mCanvas.getWidth();
+            mCanvasHigh = mCanvas.getHeight();
             Bitmap bootBit = view.getBitmap();
-            int viewLeft = (int) (with * view.getPoint().getX());
-            int viewTop = (int) (height * view.getPoint().getY());
+            int viewLeft = (int) (mCanvasWith * view.getPoint().getX());
+            int viewTop = (int) (mCanvasHigh * view.getPoint().getY());
             int viewBitWidth = bootBit.getWidth();
             int viewBitHeight = bootBit.getHeight();
             Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
@@ -219,6 +238,37 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
         }
     }
+
+
+    private boolean crashed(EnemyBoot enemyBoot, WaterBomb bomb) {
+//        2. 矩形的碰撞检测方法1
+//        碰撞条件：
+//        x抽距离差 < 两矩形宽度之和 / 2
+//        y抽距离差 < 两矩形高度之和 / 2
+        final int with = mCanvasWith;
+        final int height = mCanvasHigh;
+
+        GamePoint p1 = enemyBoot.getPoint();
+        GamePoint p2 = bomb.getPoint();
+
+        int w12 = enemyBoot.getBitmap().getWidth() + bomb.getBitmap().getWidth();
+        float dxf = p1.getX() - p2.getX();
+        float dx = Math.abs(dxf) * with;
+        if (dx > w12 / 4) {
+            //这里用4代替2
+            return false;
+        }
+
+        int h12 = enemyBoot.getBitmap().getHeight() + bomb.getBitmap().getHeight();
+        float dyf = p1.getY() - p2.getY();
+        float dy = Math.abs(dyf) * height;
+        if (dy > h12 / 4) {
+            //这里用4代替2
+            return false;
+        }
+        return true;
+    }
+
 
     /**
      * 测量

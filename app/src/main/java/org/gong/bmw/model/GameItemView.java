@@ -10,7 +10,7 @@ import org.gong.bmw.control.Movable;
  * @date 2018/6/28
  */
 
-public abstract class GameItemView  implements GameItemInterface<GameItemState>, Movable {
+public abstract class GameItemView implements GameItemInterface<GameItemState>, Movable {
     /**
      * 返回view的bitmap
      */
@@ -23,7 +23,10 @@ public abstract class GameItemView  implements GameItemInterface<GameItemState>,
 
     @Override
     public void move() {
-        GameItemState next = getGameItemState().changeTo();
-        setGameItemState(next);
+        GameItemState itState = getGameItemState();
+        if (itState != null) {
+            GameItemState next = itState.changeTo();
+            setGameItemState(next);
+        }
     }
 }

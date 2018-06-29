@@ -4,12 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import org.gong.bmw.App;
 import org.gong.bmw.R;
-import org.gong.bmw.control.BootController;
 
 /**
- *
  * @author caroline
  * @date 2018/6/28
  */
@@ -18,8 +15,8 @@ public class U26 extends EnemyBoot {
 
     private static Bitmap imageCache = null;
 
-    public U26(EnemyBootCallBack enemyBootCallBack, Context context) {
-        super(enemyBootCallBack, context);
+    public U26(Context context) {
+        super(context);
     }
 
     @Override
@@ -31,18 +28,10 @@ public class U26 extends EnemyBoot {
     @Override
     public Bitmap getBitmap() {
         if (imageCache == null) {
-            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_sub);
+            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_sub_u26);
         }
         return imageCache;
     }
 
-    @Override
-    public BootController getController() {
-        return this;
-    }
 
-    @Override
-    public GameItemState getGameItemState() {
-        return new GameItemState();
-    }
 }
