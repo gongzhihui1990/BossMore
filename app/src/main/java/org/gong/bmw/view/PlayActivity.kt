@@ -31,6 +31,7 @@ class PlayActivity : BaseActivity() {
             this@PlayActivity.btnSwitch.setOnClickListener({ start = !start })
             this@PlayActivity.btnStop.setOnClickListener({ bootController.receiveCode(BootController.Code.Stop) })
             this@PlayActivity.btnAdd.setOnClickListener({ bootController.receiveCode(BootController.Code.NewEnemy) })
+            this@PlayActivity.btnRelease.setOnClickListener({ bootController.receiveCode(BootController.Code.ReleaseBomb) })
         }
 
         var start: Boolean = true

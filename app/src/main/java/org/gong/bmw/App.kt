@@ -50,7 +50,7 @@ internal class App : BaseApp() {
     companion object {
 
         @SuppressLint("StaticFieldLeak")
-        var instance: App? = null
+        var instance: App ?= null
             private set
     }
 }

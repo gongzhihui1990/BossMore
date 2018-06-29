@@ -1,10 +1,10 @@
 package org.gong.bmw.game;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
@@ -15,11 +15,13 @@ import net.gtr.framework.util.Loger;
 
 import org.gong.bmw.control.BootController;
 import org.gong.bmw.control.GameController;
-import org.gong.bmw.model.Boot;
+import org.gong.bmw.control.GameItemInterface;
 import org.gong.bmw.model.EnemyBoot;
 import org.gong.bmw.model.EnemyBootCallBack;
+import org.gong.bmw.model.GameItemView;
 import org.gong.bmw.model.MainBoot;
 import org.gong.bmw.model.U26;
+import org.gong.bmw.model.WaterBomb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -30,6 +32,7 @@ import java.util.List;
  * @date 2018/6/27
  */
 
+@SuppressLint("ViewConstructor")
 public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     /**
      * 每30帧刷新一次屏幕
@@ -39,8 +42,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private SurfaceHolder mSurfaceHolder;
     private GameController controller;
     private boolean mIsRunning = false;
-    private Path mPath;
-    private List<Boot> boots = new ArrayList<>();
+    private List<GameItemInterface> gameItems = new ArrayList<>();
 
     public GameView(Context context, @NonNull GameController controller) {
         super(context);
@@ -54,7 +56,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     public void surfaceCreated(SurfaceHolder holder) {
         Loger.INSTANCE.i("surfaceCreated");
         mSurfaceHolder = holder;
-        mPath = new Path();
         mIsRunning = true;
         MainBoot mainBoot = new MainBoot(getContext());
         final EnemyBootCallBack enemyBootCallBack = new EnemyBootCallBack() {
@@ -70,42 +71,39 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         };
         final BootController proxyController = new BootController() {
             @Override
-            public void receiveCode(Code code) {
+            public boolean receiveCode(Code code) {
                 synchronized (mSurfaceHolder) {
-                    switch (code.getScope()) {
-                        case All:
+                    mainBoot.receiveCode(code);
+                    switch (code) {
+                        case ReleaseBomb:
+                            WaterBomb bomb = new WaterBomb();
+                            bomb.releaseAt(mainBoot.getPoint());
+                            gameItems.add(bomb);
                             break;
-                        case MainBoot:
-                            mainBoot.receiveCode(code);
-                        case EnemyBoot:
-                            switch (code) {
-                                case ClearEnemy:
-                                    for (Boot boot : boots) {
-                                        if (boot instanceof EnemyBoot) {
-                                            enemyBootCallBack.boom((EnemyBoot) boot);
-                                        }
-                                    }
-                                    break;
-                                case NewEnemy:
-                                    boots.add(new U26(enemyBootCallBack, getContext()));
-                                    break;
-                                default:
-                                    break;
+                        case ClearEnemy:
+                            for (GameItemInterface controller : gameItems) {
+                                if (controller instanceof EnemyBoot) {
+                                    enemyBootCallBack.boom((EnemyBoot) controller);
+                                }
                             }
                             break;
+                        case NewEnemy:
+                            if (gameItems.size() > 8) {
+                                return false;
+                            }
+                            gameItems.add(new U26(enemyBootCallBack, getContext()));
+                            break;
+
                         default:
                             break;
                     }
                 }
+                return true;
             }
 
-            @Override
-            public void move() {
-                mainBoot.move();
-            }
         };
         controller.onBootControllerPrepared(proxyController);
-        boots.add(mainBoot);
+        gameItems.add(mainBoot);
 
         new GameThread(this).start();
     }
@@ -130,7 +128,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             synchronized (mSurfaceHolder) {
                 switch (controller.getGameState()) {
                     case Run:
-                        moveBoots();
+                        moveItems();
                         break;
                     case Pause:
                         //TODO
@@ -172,10 +170,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         int y = (int) event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mPath.moveTo(x, y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                mPath.lineTo(x, y);
                 break;
             case MotionEvent.ACTION_UP:
                 break;
@@ -188,36 +184,41 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private void drawing() {
         //SurfaceView背景
         mCanvas.drawColor(Color.WHITE);
-        drawBoots();
+        drawItems();
     }
 
-    private void moveBoots() {
-        for (Boot boot : boots) {
-            boot.move();
+    private void moveItems() {
+        for (GameItemInterface controller : gameItems) {
+            controller.move();
         }
         //删除无效的Boot
-        Iterator<Boot> it = boots.iterator();
+        Iterator<GameItemInterface> it = gameItems.iterator();
         while (it.hasNext()) {
-            Boot x = it.next();
+            GameItemInterface x = it.next();
             if (x.shouldRemove()) {
                 it.remove();
             }
         }
     }
 
-    private void drawBoots() {
-        for (Boot boot : boots) {
-            int with = mCanvas.getWidth();
-            int height = mCanvas.getHeight();
+    private void drawItems() {
+        for (GameItemInterface gameItem : gameItems) {
 
-            Bitmap bootBit = boot.getBitmap();
-            int bootLeft = (int) (with * boot.getPositionHorizon());
-            int bootTop = (int) (height * boot.getPositionVertical());
-            int bootBitWidth = bootBit.getWidth();
-            int bootBitHeight = bootBit.getHeight();
-            Rect bootSrcRect = new Rect(0, 0, bootBitWidth, bootBitHeight);
-            Rect bootDesRect = new Rect(bootLeft, bootTop, bootLeft + bootBitWidth, bootTop + bootBitHeight);
-            mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
+            if (gameItem instanceof GameItemView) {
+                int with = mCanvas.getWidth();
+                int height = mCanvas.getHeight();
+                GameItemView view = ((GameItemView) gameItem);
+                Bitmap bootBit = view.getBitmap();
+                int viewLeft = (int) (with * view.getPoint().getX());
+                int viewTop = (int) (height * view.getPoint().getY());
+                int viewBitWidth = bootBit.getWidth();
+                int viewBitHeight = bootBit.getHeight();
+                Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
+                Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
+                mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
+            }
+
+
         }
     }
 

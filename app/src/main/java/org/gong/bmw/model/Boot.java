@@ -14,20 +14,13 @@ import java.util.UUID;
  * @date 2018/6/27
  */
 
-public abstract class Boot implements GameBoot {
+public abstract class Boot implements GameBoot, GameItemView {
     /**
      * 边界屏幕宽度千分比
      */
     private static final float BOUNDARY = 0.01f;
     protected Context context;
-    /**
-     * 位置 0-1
-     */
-    private float positionVertical = 0f;
-    /**
-     * 位置 0-1
-     */
-    private float positionHorizon = 0f;
+
     /**
      * 速度屏幕宽度千分比
      */
@@ -38,21 +31,24 @@ public abstract class Boot implements GameBoot {
     private Direct direct = Direct.Stay;
     private boolean shouldRemove = false;
     private UUID uuid;
+    private GamePoint point = new GamePoint(0, 0);
+
 
     Boot(Context context) {
-        initBy(context);
+        initBoot(context);
     }
 
     public void onRemove() {
         shouldRemove = true;
     }
 
+    @Override
     public boolean shouldRemove() {
         return shouldRemove;
     }
 
     @Override
-    public void initBy(Context context) {
+    public void initBoot(Context context) {
         this.context = context;
         this.uuid = UUID.randomUUID();
     }
@@ -65,31 +61,8 @@ public abstract class Boot implements GameBoot {
         this.speed = speed.speed;
     }
 
-    /**
-     * 0-1
-     *
-     * @return
-     */
-    public float getPositionHorizon() {
-        return positionHorizon;
-    }
 
-    public void setPositionHorizon(float positionHorizon) {
-        this.positionHorizon = positionHorizon;
-    }
 
-    /**
-     * 0-1
-     *
-     * @return
-     */
-    public float getPositionVertical() {
-        return positionVertical;
-    }
-
-    public void setPositionVertical(float positionVertical) {
-        this.positionVertical = positionVertical;
-    }
 
     public @NonNull
     Direct getDirect() {
@@ -108,17 +81,17 @@ public abstract class Boot implements GameBoot {
     }
 
     private Boundary getBoundary() {
-        if (positionHorizon < BOUNDARY) {
+        if (point.getX() < BOUNDARY) {
             return Boundary.Left;
         }
-        if (positionHorizon > 1 - BOUNDARY) {
+        if (point.getX() > 1 - BOUNDARY) {
             return Boundary.Right;
         }
         return Boundary.Mid;
     }
 
     @Override
-    public void receiveCode(BootController.Code code) {
+    public boolean receiveCode(BootController.Code code) {
         Loger.INSTANCE.e("receiveCode:" + code);
         switch (code) {
             case Right:
@@ -133,6 +106,7 @@ public abstract class Boot implements GameBoot {
             default:
                 break;
         }
+        return true;
     }
 
     @Override
@@ -166,16 +140,19 @@ public abstract class Boot implements GameBoot {
     }
 
     private void moveBy(float distanceHorizon) {
-        positionHorizon += distanceHorizon;
-        if (positionHorizon > 1) {
-            positionHorizon = 1;
-        }
-        if (positionHorizon < 0) {
-            positionHorizon = 0;
-        }
+        point.moveX(distanceHorizon);
     }
 
     abstract void onMoved(boolean moved);
+
+    @Override
+    public GamePoint getPoint() {
+        return point;
+    }
+
+    public void setPoint(GamePoint point) {
+        this.point = point;
+    }
 
     enum Speed {
         L1(0.001f), L2(0.0012f), L3(0.002f), L4(0.0028f), L5(0.0032f);

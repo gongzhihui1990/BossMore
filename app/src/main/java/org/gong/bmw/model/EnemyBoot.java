@@ -4,15 +4,13 @@ import android.content.Context;
 
 import net.gtr.framework.util.Loger;
 
-import java.util.UUID;
-
 /**
  * @author caroline
  * @date 2018/6/28
  */
 
 public abstract class EnemyBoot extends Boot {
-    EnemyBootCallBack enemyBootCallBack;
+    private EnemyBootCallBack enemyBootCallBack;
 
     public EnemyBoot(EnemyBootCallBack enemyBootCallBack, Context context) {
         super(context);
@@ -20,11 +18,10 @@ public abstract class EnemyBoot extends Boot {
     }
 
     @Override
-    public void initBy(Context context) {
+    public void initBoot(Context context) {
         this.context = context;
         setDirect(Direct.Left);
-        setPositionHorizon(1);
-        setPositionVertical(1-(float) Math.random() * 0.8f);
+        setPoint(new GamePoint(1,0.9f-(float) Math.random() * 0.8f));
         setSpeed(Speed.L1);
         init();
     }

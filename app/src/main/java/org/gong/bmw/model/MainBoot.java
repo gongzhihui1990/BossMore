@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import net.gtr.framework.util.Loger;
-
 import org.gong.bmw.R;
 import org.gong.bmw.control.BootController;
 
@@ -14,18 +12,18 @@ import org.gong.bmw.control.BootController;
  * @date 2018/6/27
  */
 
-public class MainBoot extends Boot {
+public final class MainBoot extends Boot {
 
-    private  transient Bitmap imageCache = null;
+    private transient Bitmap imageCache = null;
 
     public MainBoot(Context context) {
         super(context);
     }
 
     @Override
-    public void initBy(Context context) {
-        super.initBy(context);
-        setPositionHorizon(0.5f);
+    public void initBoot(Context context) {
+        super.initBoot(context);
+        setPoint(new GamePoint(0.5f, 0.2f));
     }
 
     @Override
