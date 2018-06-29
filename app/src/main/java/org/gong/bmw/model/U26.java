@@ -16,7 +16,7 @@ import org.gong.bmw.control.BootController;
 
 public class U26 extends EnemyBoot {
 
-    private transient Bitmap imageCache = null;
+    private static Bitmap imageCache = null;
 
     public U26(EnemyBootCallBack enemyBootCallBack, Context context) {
         super(enemyBootCallBack, context);
