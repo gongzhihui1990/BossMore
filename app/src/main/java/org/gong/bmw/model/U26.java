@@ -41,4 +41,8 @@ public class U26 extends EnemyBoot {
         return this;
     }
 
+    @Override
+    public GameItemState getGameItemState() {
+        return new GameItemState();
+    }
 }

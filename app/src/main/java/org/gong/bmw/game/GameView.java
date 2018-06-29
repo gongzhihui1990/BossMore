@@ -42,7 +42,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private SurfaceHolder mSurfaceHolder;
     private GameController controller;
     private boolean mIsRunning = false;
-    private List<GameItemInterface> gameItems = new ArrayList<>();
+    private List<GameItemView> gameItems = new ArrayList<>();
 
     public GameView(Context context, @NonNull GameController controller) {
         super(context);
@@ -73,12 +73,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             @Override
             public boolean receiveCode(Code code) {
                 synchronized (mSurfaceHolder) {
-                    mainBoot.receiveCode(code);
                     switch (code) {
                         case ReleaseBomb:
-                            WaterBomb bomb = new WaterBomb();
-                            bomb.releaseAt(mainBoot.getPoint());
-                            gameItems.add(bomb);
+                            if (mainBoot.getGameItemState().getState() == MainBoot.State.normal){
+                                WaterBomb bomb = new WaterBomb();
+                                bomb.releaseAt(mainBoot.getPoint());
+                                mainBoot.receiveCode(Code.ReleaseBomb);
+                                gameItems.add(bomb);
+                            }
+
                             break;
                         case ClearEnemy:
                             for (GameItemInterface controller : gameItems) {
@@ -95,6 +98,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                             break;
 
                         default:
+                            mainBoot.receiveCode(code);
                             break;
                     }
                 }
@@ -188,11 +192,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     }
 
     private void moveItems() {
-        for (GameItemInterface controller : gameItems) {
-            controller.move();
+        for (GameItemView itemView : gameItems) {
+            itemView.move();
         }
         //删除无效的Boot
-        Iterator<GameItemInterface> it = gameItems.iterator();
+        Iterator<GameItemView> it = gameItems.iterator();
         while (it.hasNext()) {
             GameItemInterface x = it.next();
             if (x.shouldRemove()) {
@@ -202,23 +206,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     }
 
     private void drawItems() {
-        for (GameItemInterface gameItem : gameItems) {
-
-            if (gameItem instanceof GameItemView) {
-                int with = mCanvas.getWidth();
-                int height = mCanvas.getHeight();
-                GameItemView view = ((GameItemView) gameItem);
-                Bitmap bootBit = view.getBitmap();
-                int viewLeft = (int) (with * view.getPoint().getX());
-                int viewTop = (int) (height * view.getPoint().getY());
-                int viewBitWidth = bootBit.getWidth();
-                int viewBitHeight = bootBit.getHeight();
-                Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
-                Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
-                mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
-            }
-
-
+        for (GameItemView view : gameItems) {
+            int with = mCanvas.getWidth();
+            int height = mCanvas.getHeight();
+            Bitmap bootBit = view.getBitmap();
+            int viewLeft = (int) (with * view.getPoint().getX());
+            int viewTop = (int) (height * view.getPoint().getY());
+            int viewBitWidth = bootBit.getWidth();
+            int viewBitHeight = bootBit.getHeight();
+            Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
+            Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
+            mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
         }
     }
 

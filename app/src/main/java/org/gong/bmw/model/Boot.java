@@ -14,7 +14,7 @@ import java.util.UUID;
  * @date 2018/6/27
  */
 
-public abstract class Boot implements GameBoot, GameItemView {
+public abstract class Boot extends GameItemView implements GameBoot {
     /**
      * 边界屏幕宽度千分比
      */
@@ -32,7 +32,6 @@ public abstract class Boot implements GameBoot, GameItemView {
     private boolean shouldRemove = false;
     private UUID uuid;
     private GamePoint point = new GamePoint(0, 0);
-
 
     Boot(Context context) {
         initBoot(context);
@@ -62,8 +61,6 @@ public abstract class Boot implements GameBoot, GameItemView {
     }
 
 
-
-
     public @NonNull
     Direct getDirect() {
         return direct;
@@ -77,7 +74,6 @@ public abstract class Boot implements GameBoot, GameItemView {
 
     protected boolean inFrame() {
         return Boundary.Mid == getBoundary();
-
     }
 
     private Boundary getBoundary() {
@@ -111,7 +107,7 @@ public abstract class Boot implements GameBoot, GameItemView {
 
     @Override
     public final void move() {
-        //TODO
+        super.move();
         switch (direct) {
             case Stay:
                 onMoved(false);
@@ -153,6 +149,7 @@ public abstract class Boot implements GameBoot, GameItemView {
     public void setPoint(GamePoint point) {
         this.point = point;
     }
+
 
     enum Speed {
         L1(0.001f), L2(0.0012f), L3(0.002f), L4(0.0028f), L5(0.0032f);

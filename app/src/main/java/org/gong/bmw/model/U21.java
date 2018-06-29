@@ -30,4 +30,8 @@ public class U21 extends EnemyBoot {
         return null;
     }
 
+    @Override
+    public GameItemState getGameItemState() {
+        return null;
+    }
 }

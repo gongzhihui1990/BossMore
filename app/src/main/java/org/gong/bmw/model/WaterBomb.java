@@ -12,7 +12,7 @@ import org.gong.bmw.control.GameItemInterface;
  * @date 2018/6/28
  */
 
-public class WaterBomb implements GameItemView, GameItemInterface {
+public class WaterBomb extends GameItemView {
     private Bitmap imageCache;
     /**
      * 位置 0-1
@@ -44,6 +44,7 @@ public class WaterBomb implements GameItemView, GameItemInterface {
 
     @Override
     public void move() {
+        super.move();
         gamePoint.moveY(speed);
         if (gamePoint.getY() == 1) {
             state = State.Bomb;
@@ -53,6 +54,17 @@ public class WaterBomb implements GameItemView, GameItemInterface {
     @Override
     public boolean shouldRemove() {
         return state == State.End;
+    }
+
+
+    @Override
+    public GameItemState getGameItemState() {
+        return new GameItemState();
+    }
+
+    @Override
+    public void setGameItemState(GameItemState state) {
+
     }
 
 

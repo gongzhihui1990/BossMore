@@ -10,7 +10,7 @@ import org.gong.bmw.control.GameItemInterface;
  * @date 2018/6/27
  */
 
-public interface GameBoot extends BootController, GameItemInterface {
+public interface GameBoot extends BootController {
     /**
      * 初始化
      */

@@ -35,6 +35,10 @@ public abstract class EnemyBoot extends Boot {
         }
     }
 
+    @Override
+    public void setGameItemState(GameItemState state) {
+
+    }
 
     abstract public void init();
 }
