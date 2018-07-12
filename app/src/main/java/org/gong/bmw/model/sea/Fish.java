@@ -1,4 +1,4 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,11 +11,11 @@ import org.gong.bmw.R;
  * @date 2018/6/28
  */
 
-public class U26 extends EnemyBoot {
+public class Fish extends EnemyBoot {
 
     private static Bitmap imageCache = null;
 
-    public U26(Context context) {
+    public Fish(Context context) {
         super(context);
     }
 
@@ -28,7 +28,7 @@ public class U26 extends EnemyBoot {
     @Override
     public Bitmap getBitmap() {
         if (imageCache == null) {
-            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_sub_u26);
+            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_whale);
         }
         return imageCache;
     }

@@ -1,4 +1,4 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,13 +6,15 @@ import android.graphics.BitmapFactory;
 
 import org.gong.bmw.R;
 import org.gong.bmw.control.BootController;
+import org.gong.bmw.model.GameItemState;
+import org.gong.bmw.model.GamePoint;
 
 /**
  * @author caroline
  * @date 2018/6/27
  */
 
-public final class MainBoot extends Boot {
+public final class MainBoot extends BaseBoot {
 
     private transient Bitmap imageCache = null;
     private MainBootState bootState = new MainBootState(State.normal);
@@ -25,7 +27,7 @@ public final class MainBoot extends Boot {
     public void initBoot(Context context) {
         super.initBoot(context);
         //设置初始屏幕位置
-        setPoint(new GamePoint(0.5f, 0.1f));
+        setPoint(new GamePoint(0.5f, 0.3f));
         setSpeed(Speed.L5);
     }
 

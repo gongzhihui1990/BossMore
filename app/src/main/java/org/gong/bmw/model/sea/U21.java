@@ -1,11 +1,10 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.gong.bmw.R;
-import org.gong.bmw.control.BootController;
 
 /**
  * Created by caroline on 2018/6/28.
@@ -22,7 +21,6 @@ public class U21 extends EnemyBoot {
     public void init() {
         setSpeed(Speed.L5);
     }
-
 
 
     @Override

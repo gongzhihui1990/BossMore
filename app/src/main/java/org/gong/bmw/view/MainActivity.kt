@@ -17,9 +17,13 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        tvMain.text = String.format("%s %s", "Welcome to\n", getString(R.string.app_name))
+        val ag = Math.PI * 210 / 180
+        tvMain.text = String.format("%s %s", "欢迎使用\n" +"角度"+ag+"\ncos 210="+ format(Math.cos(ag)) + "\nsin 210=" + format(Math.sin(ag)), getString(R.string.my_app_name))
         btnStart.setOnClickListener({ startActivity(Intent(this@MainActivity, PlayActivity::class.java)) })
         btnQuit.setOnClickListener({ this@MainActivity.finish() })
     }
 
+    fun format(number: Number):String{
+        return String.format("%.3f",number)
+    }
 }

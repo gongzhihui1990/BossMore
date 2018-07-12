@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_12"
-        android:text="Right"
+        android:text="右"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -30,12 +30,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_12"
-        android:text="Left"
+        android:text="左"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnRight" />
 
     <Button
-        android:text="Stop"
+        android:text="停"
         android:id="@+id/btnStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnLeft"
         app:layout_constraintEnd_toEndOf="parent"  />
     <Button
-        android:text="Release"
+        android:text="投弹"
         android:id="@+id/btnRelease"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
         app:layout_constraintEnd_toStartOf="@id/btnStop"  />
 
     <Button
-        android:text="Switch"
+        android:text="暂停"
         android:id="@+id/btnSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,6 +61,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
+        android:visibility="gone"
         android:text="Add"
         android:id="@+id/btnAdd"
         android:layout_width="wrap_content"

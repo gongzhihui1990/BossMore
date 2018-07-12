@@ -1,10 +1,13 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.gong.bmw.App;
 import org.gong.bmw.R;
+import org.gong.bmw.model.GameItemState;
+import org.gong.bmw.model.GameItemView;
+import org.gong.bmw.model.GamePoint;
 
 /**
  * @author caroline
@@ -47,7 +50,7 @@ public class WaterBomb extends GameItemView {
     }
 
     @Override
-    public GamePoint getPoint() {
+    public GamePoint getPosition() {
         return gamePoint;
     }
 

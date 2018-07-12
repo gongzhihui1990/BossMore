@@ -1,4 +1,4 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.content.Context;
 

@@ -1,4 +1,4 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import net.gtr.framework.util.Loger;
 
 import org.gong.bmw.control.BootController;
+import org.gong.bmw.model.GameItemView;
+import org.gong.bmw.model.GamePoint;
 
 import java.util.UUID;
 
@@ -14,7 +16,7 @@ import java.util.UUID;
  * @date 2018/6/27
  */
 
-public abstract class Boot extends GameItemView implements GameBoot {
+public abstract class BaseBoot extends GameItemView implements GameBoot {
     /**
      * 边界屏幕宽度千分比
      */
@@ -32,7 +34,7 @@ public abstract class Boot extends GameItemView implements GameBoot {
     private UUID uuid;
     private GamePoint point = new GamePoint(0, 0);
 
-    Boot(Context context) {
+    BaseBoot(Context context) {
         initBoot(context);
     }
 
@@ -107,7 +109,7 @@ public abstract class Boot extends GameItemView implements GameBoot {
                 direct = Direct.Stay;
                 break;
             case Sink:
-                direct = Direct.Bottom;
+                direct = Direct.Sink;
                 break;
             default:
                 break;
@@ -147,6 +149,14 @@ public abstract class Boot extends GameItemView implements GameBoot {
                     direct = Direct.Stay;
                 }
                 break;
+            case Sink:
+                if (getBoundaryY() != Boundary.Bottom) {
+                    onMoved(true);
+                    point.move(-speed / 2, speed);
+                } else {
+                    direct = Direct.Stay;
+                }
+                break;
             default:
                 break;
         }
@@ -157,7 +167,7 @@ public abstract class Boot extends GameItemView implements GameBoot {
     abstract void onMoved(boolean moved);
 
     @Override
-    public GamePoint getPoint() {
+    public GamePoint getPosition() {
         return point;
     }
 
@@ -182,7 +192,7 @@ public abstract class Boot extends GameItemView implements GameBoot {
     }
 
     public enum Direct {
-        Right(1), Stay(0), Left(-1), Bottom(3);
+        Right(1), Stay(0), Left(-1), Bottom(3), Sink(4);
 
         int direct;
 

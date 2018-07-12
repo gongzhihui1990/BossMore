@@ -10,6 +10,6 @@ import org.gong.bmw.model.GameState;
 public interface GameController   {
     GameState getGameState();
 
-    void onBootControllerPrepared(BootController bootController);
+    void onPlayerControllerPrepared(BootController bootController);
 
 }

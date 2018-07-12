@@ -7,9 +7,9 @@ package org.gong.bmw.game;
  */
 
 public class GameThread extends Thread {
-    private GameView gameView;
+    private SeaFightGameView gameView;
 
-    public GameThread(GameView gameView) {
+    public GameThread(SeaFightGameView gameView) {
         this.gameView = gameView;
     }
 

@@ -1,17 +1,20 @@
-package org.gong.bmw.model;
+package org.gong.bmw.model.sea;
 
 import android.content.Context;
+import android.content.Intent;
 
 import net.gtr.framework.util.Loger;
 
 import org.gong.bmw.control.BootController;
+import org.gong.bmw.model.GameItemState;
+import org.gong.bmw.model.GamePoint;
 
 /**
  * @author caroline
  * @date 2018/6/28
  */
 
-public abstract class EnemyBoot extends Boot {
+public abstract class EnemyBoot extends BaseBoot {
     protected EnemyBootState enemyBootState = new EnemyBootState(State.normal);
 
     public EnemyBoot(Context context) {
@@ -22,7 +25,7 @@ public abstract class EnemyBoot extends Boot {
     public void initBoot(Context context) {
         this.context = context;
         setDirect(Direct.Left);
-        setPoint(new GamePoint(1, 0.9f - (float) Math.random() * 0.8f));
+        setPoint(new GamePoint(1, 1.1f - (float) Math.random() * 0.8f));
         setSpeed(Speed.L1);
         init();
     }
@@ -61,13 +64,14 @@ public abstract class EnemyBoot extends Boot {
 
     public void bomb() {
         if (enemyBootState.state == State.normal) {
-            enemyBootState = new EnemyBootState(State.bomb);
+            enemyBootState = new EnemyBootState(State.shot);
         }
+        context.sendBroadcast(new Intent("com.xilai.express.playaudio_start"));
         receiveCode(Code.Sink);
     }
 
     public enum State {
-        normal, bomb, end
+        normal, shot, end
     }
 
     public class EnemyBootState extends GameItemState {
@@ -79,8 +83,8 @@ public abstract class EnemyBoot extends Boot {
             switch (state) {
                 case normal:
                     break;
-                case bomb:
-                    setTimes(10);
+                case shot:
+                    setTimes(100);
                     setNextState(new EnemyBoot.EnemyBootState(EnemyBoot.State.end));
                 default:
                     break;

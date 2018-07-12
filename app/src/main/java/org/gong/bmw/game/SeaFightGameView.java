@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
@@ -16,13 +17,17 @@ import net.gtr.framework.util.Loger;
 import org.gong.bmw.control.BootController;
 import org.gong.bmw.control.GameController;
 import org.gong.bmw.control.GameItemInterface;
-import org.gong.bmw.model.EnemyBoot;
 import org.gong.bmw.model.GameItemView;
 import org.gong.bmw.model.GamePoint;
-import org.gong.bmw.model.MainBoot;
-import org.gong.bmw.model.U21;
-import org.gong.bmw.model.U26;
-import org.gong.bmw.model.WaterBomb;
+import org.gong.bmw.model.sea.EnemyBoot;
+import org.gong.bmw.model.sea.Fish;
+import org.gong.bmw.model.sea.GameTimer;
+import org.gong.bmw.model.sea.MainBoot;
+import org.gong.bmw.model.sea.Moon;
+import org.gong.bmw.model.sea.Sun;
+import org.gong.bmw.model.sea.U21;
+import org.gong.bmw.model.sea.U26;
+import org.gong.bmw.model.sea.WaterBomb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +39,7 @@ import java.util.List;
  */
 
 @SuppressLint("ViewConstructor")
-public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
+public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     /**
      * 每30帧刷新一次屏幕
      **/
@@ -46,16 +51,42 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private int mCanvasWith;
     private int mCanvasHigh;
     private SurfaceHolder mSurfaceHolder;
-    private GameController controller;
+    private GameController mGameController;
     private boolean mIsRunning = false;
     private List<GameItemView> gameItems = new ArrayList<>();
+    /**
+     * 海洋画笔
+     */
+    private Paint pSea;
+    /**
+     * 天空画笔
+     */
+    private Paint pSky;
+    /**
+     * 太阳画笔
+     */
+    private Paint pSun;
 
-    public GameView(Context context, @NonNull GameController controller) {
+    private Sun sun;
+    private Moon moon;
+
+    private GameTimer gameTimer = GameTimer.Companion.getInstance();
+
+    public SeaFightGameView(Context context, @NonNull GameController controller) {
         super(context);
         Loger.INSTANCE.i("GameView");
-        this.controller = controller;
+        this.mGameController = controller;
         mSurfaceHolder = this.getHolder();
         mSurfaceHolder.addCallback(this);
+        pSea = new Paint();
+        pSea.setColor(Color.BLUE);
+        pSea.setAntiAlias(true);
+        pSky = new Paint();
+        pSky.setColor(Color.WHITE);
+        pSky.setAntiAlias(true);
+        pSun = new Paint();
+        pSun.setAntiAlias(true);
+        pSun.setColor(Color.RED);
     }
 
     @Override
@@ -70,7 +101,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                     case ReleaseBomb:
                         if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
                             WaterBomb bomb = new WaterBomb();
-                            bomb.releaseAt(mainBoot.getPoint());
+                            bomb.releaseAt(mainBoot.getPosition());
                             mainBoot.receiveCode(BootController.Code.ReleaseBomb);
                             gameItems.add(bomb);
                         }
@@ -97,7 +128,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             }
             return true;
         };
-        controller.onBootControllerPrepared(proxyController);
+        mGameController.onPlayerControllerPrepared(proxyController);
         gameItems.add(mainBoot);
 
         new GameThread(this).start();
@@ -121,8 +152,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
 
             /**在这里加上线程安全锁**/
             synchronized (mSurfaceHolder) {
-                switch (controller.getGameState()) {
+                switch (mGameController.getGameState()) {
                     case Run:
+                        //时间流转
+                        GameTimer.Companion.getInstance().passBy();
                         //新增敌人
                         int enemyBootSize = 0;
                         for (GameItemView gameItemView : gameItems) {
@@ -132,11 +165,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                         }
                         double random = Math.random();
                         Loger.INSTANCE.d("random: " + random);
-                        if (enemyBootSize < 10 && Math.random() * 100 < 3) {
+                        if (enemyBootSize < 10 && random * 100 < 3) {
                             gameItems.add(new U26(getContext()));
                         }
-                        if (enemyBootSize < 10 && Math.random() * 100 < 15 && Math.random() * 100 > 10) {
+                        if (enemyBootSize < 10 && random * 100 < 15 && random * 100 > 10) {
                             gameItems.add(new U21(getContext()));
+                        }
+                        if (enemyBootSize < 10 && random * 100 == 16) {
+                            gameItems.add(new Fish(getContext()));
                         }
                         //元素移动
                         for (GameItemView itemView : gameItems) {
@@ -222,15 +258,45 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     }
 
     private void drawing() {
-        //SurfaceView背景
+        mCanvasWith = mCanvas.getWidth();
+        mCanvasHigh = mCanvas.getHeight();
+        if (sun == null) {
+            sun = new Sun(mCanvasWith, mCanvasHigh);
+        }
+        if (moon == null) {
+            moon = new Moon(mCanvasWith, mCanvasHigh);
+        }
+
+        //绘制：远-近
+
+        //背景
         mCanvas.drawColor(Color.WHITE);
-        //drawItems
+        //天空
+        Rect rSky = new Rect(0, 0, mCanvasWith, (int) (mCanvasHigh * 0.3));
+        mCanvas.drawRect(rSky, pSky);
+        //太阳
+        mCanvas.drawCircle(sun.getCx(), sun.getCy(), sun.getCr(), pSun);
+        //月亮
+        int moonLeft = (int) (moon.getCx());
+        int moonTop = (int) (moon.getCy());
+        Bitmap moonBit = moon.getBitmap();
+        int moonBitWidth = moonBit.getWidth();
+        int moonBitHeight = moonBit.getHeight();
+        Rect moonSrcRect = new Rect(0, 0, moonBitWidth, moonBitHeight);
+        Rect moonDesRect = new Rect(moonLeft, moonTop, moonLeft + moonBitWidth, moonTop + moonBitHeight);
+        mCanvas.drawBitmap(moonBit, moonSrcRect, moonDesRect, null);
+        //大海
+        Rect rSea = new Rect(0, (int) (mCanvasHigh * 0.3), mCanvasWith, mCanvasHigh);
+        mCanvas.drawRect(rSea, pSea);
+        //游戏其他元素
         for (GameItemView view : gameItems) {
-            mCanvasWith = mCanvas.getWidth();
-            mCanvasHigh = mCanvas.getHeight();
             Bitmap bootBit = view.getBitmap();
-            int viewLeft = (int) (mCanvasWith * view.getPoint().getX());
-            int viewTop = (int) (mCanvasHigh * view.getPoint().getY());
+            int highBuff = 0;
+            if (view instanceof MainBoot) {
+                highBuff = (int) (bootBit.getHeight() * 0.8);
+            }
+            int viewLeft = (int) (mCanvasWith * view.getPosition().getX());
+            int viewTop = (int) (mCanvasHigh * view.getPosition().getY()) - highBuff;
             int viewBitWidth = bootBit.getWidth();
             int viewBitHeight = bootBit.getHeight();
             Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
@@ -238,7 +304,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
         }
     }
-
 
     private boolean crashed(EnemyBoot enemyBoot, WaterBomb bomb) {
 //        2. 矩形的碰撞检测方法1
@@ -248,47 +313,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         final int with = mCanvasWith;
         final int height = mCanvasHigh;
 
-        GamePoint p1 = enemyBoot.getPoint();
-        GamePoint p2 = bomb.getPoint();
+        GamePoint p1 = enemyBoot.getPosition();
+        GamePoint p2 = bomb.getPosition();
 
         int w12 = enemyBoot.getBitmap().getWidth() + bomb.getBitmap().getWidth();
-        float dxf = p1.getX() - p2.getX();
-        float dx = Math.abs(dxf) * with;
-        if (dx > w12 / 4) {
-            //这里用4代替2
+        float dxf = (p1.getX() * with + enemyBoot.getBitmap().getWidth() / 2) - (p2.getX() * with + bomb.getBitmap().getWidth() / 2);
+        float dx = Math.abs(dxf);
+        if (dx > w12 / 2) {
             return false;
         }
 
         int h12 = enemyBoot.getBitmap().getHeight() + bomb.getBitmap().getHeight();
-        float dyf = p1.getY() - p2.getY();
-        float dy = Math.abs(dyf) * height;
-        if (dy > h12 / 4) {
-            //这里用4代替2
+        float dyf = (p1.getY() * with + enemyBoot.getBitmap().getHeight() / 2) - (p2.getY() * with + bomb.getBitmap().getHeight() / 2);
+        float dy = Math.abs(dyf);
+        if (dy > h12 / 2) {
             return false;
         }
         return true;
     }
 
-
-    /**
-     * 测量
-     */
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int wSpecMode = MeasureSpec.getMode(widthMeasureSpec);
-        int wSpecSize = MeasureSpec.getSize(widthMeasureSpec);
-        int hSpecMode = MeasureSpec.getMode(heightMeasureSpec);
-        int hSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(wSpecSize, hSpecSize);
-
-//        if (wSpecMode == MeasureSpec.AT_MOST && hSpecMode == MeasureSpec.AT_MOST) {
-//            setMeasuredDimension(300, 300);
-//        } else if (wSpecMode == MeasureSpec.AT_MOST) {
-//            setMeasuredDimension(300, hSpecSize);
-//        } else if (hSpecMode == MeasureSpec.AT_MOST) {
-//            setMeasuredDimension(wSpecSize, 300);
-//        }
-    }
 
 }

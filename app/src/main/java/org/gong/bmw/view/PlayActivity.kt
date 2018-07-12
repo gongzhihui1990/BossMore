@@ -1,11 +1,12 @@
 package org.gong.bmw.view
 
+import android.content.Intent
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_play.*
 import org.gong.bmw.R
 import org.gong.bmw.control.BootController
 import org.gong.bmw.control.GameController
-import org.gong.bmw.game.GameView
+import org.gong.bmw.game.SeaFightGameView
 import org.gong.bmw.model.GameState
 
 /**
@@ -20,17 +21,19 @@ class PlayActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        rootView.addView(GameView(this, MainGameController()))
+        rootView.addView(SeaFightGameView(this, MainGameController()))
     }
 
     inner class MainGameController : GameController {
 
-        override fun onBootControllerPrepared(bootController: BootController) {
+        override fun onPlayerControllerPrepared(bootController: BootController) {
             this@PlayActivity.btnLeft.setOnClickListener({ bootController.receiveCode(BootController.Code.Left) })
             this@PlayActivity.btnRight.setOnClickListener({ bootController.receiveCode(BootController.Code.Right) })
             this@PlayActivity.btnSwitch.setOnClickListener({ start = !start })
             this@PlayActivity.btnStop.setOnClickListener({ bootController.receiveCode(BootController.Code.Stop) })
-            this@PlayActivity.btnAdd.setOnClickListener({ bootController.receiveCode(BootController.Code.NewEnemy) })
+            this@PlayActivity.btnAdd.setOnClickListener({
+                bootController.receiveCode(BootController.Code.NewEnemy)
+            })
             this@PlayActivity.btnRelease.setOnClickListener({ bootController.receiveCode(BootController.Code.ReleaseBomb) })
         }
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sea Fight</string>
+    <string name="my_app_name">研发助手</string>
     <string name="cop_name">喜来快递</string>
     <string name="sure">确认</string>
     <string name="cancel">取消</string>
@@ -29,7 +29,7 @@
     <string name="progress_symbol">...</string>
 
     <!--main home page-->
-    <string name="action_start_game">Start</string>
-    <string name="action_quit_app">Quit</string>
+    <string name="action_start_game">开始使用</string>
+    <string name="action_quit_app">退出应用</string>
 
 </resources>
