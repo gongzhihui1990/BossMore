@@ -19,8 +19,11 @@ import android.os.Build.SERIAL
 
 internal class App : BaseApp() {
 
-    override fun onCreate() {
+    init {
         instance = this
+    }
+
+    override fun onCreate() {
         super.onCreate()
     }
 
@@ -48,9 +51,7 @@ internal class App : BaseApp() {
     }
 
     companion object {
-
         @SuppressLint("StaticFieldLeak")
-        var instance: App ?= null
-            private set
+        lateinit var instance: App
     }
 }

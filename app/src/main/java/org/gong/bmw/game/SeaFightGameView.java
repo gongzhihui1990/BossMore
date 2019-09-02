@@ -14,11 +14,15 @@ import android.view.SurfaceView;
 
 import net.gtr.framework.util.Loger;
 
+import org.gong.bmw.R;
 import org.gong.bmw.control.BootController;
 import org.gong.bmw.control.GameController;
 import org.gong.bmw.control.GameItemInterface;
+import org.gong.bmw.model.GameItemBitmapView;
+import org.gong.bmw.model.GameItemDrawView;
 import org.gong.bmw.model.GameItemView;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.sea.Cloud;
 import org.gong.bmw.model.sea.EnemyBoot;
 import org.gong.bmw.model.sea.Fish;
 import org.gong.bmw.model.sea.GameTimer;
@@ -63,6 +67,10 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
      */
     private Paint pSky;
     /**
+     * 云画笔
+     */
+    private Paint pCloud;
+    /**
      * 太阳画笔
      */
     private Paint pSun;
@@ -84,6 +92,9 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         pSky = new Paint();
         pSky.setColor(Color.WHITE);
         pSky.setAntiAlias(true);
+        pCloud = new Paint();
+        pCloud.setColor(Color.WHITE);
+        pCloud.setAntiAlias(true);
         pSun = new Paint();
         pSun.setAntiAlias(true);
         pSun.setColor(Color.RED);
@@ -165,13 +176,17 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         }
                         double random = Math.random();
                         Loger.INSTANCE.d("random: " + random);
+                        if (random * 100 > 96) {
+                            Cloud cloud = new Cloud(mCanvasHigh, mCanvasWith);
+                            gameItems.add(cloud);
+                        }
                         if (enemyBootSize < 10 && random * 100 < 3) {
                             gameItems.add(new U26(getContext()));
                         }
                         if (enemyBootSize < 10 && random * 100 < 15 && random * 100 > 10) {
                             gameItems.add(new U21(getContext()));
                         }
-                        if (enemyBootSize < 10 && random * 100 == 16) {
+                        if (enemyBootSize < 10 && random * 100 < 20 && random * 100 > 15) {
                             gameItems.add(new Fish(getContext()));
                         }
                         //元素移动
@@ -205,6 +220,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                                 it.remove();
                             }
                         }
+
                         break;
                     case Pause:
                         //TODO
@@ -271,7 +287,23 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
 
         //背景
         mCanvas.drawColor(Color.WHITE);
-        //天空
+        switch (GameTimer.Companion.getInstance().getTimeType()) {
+            case Night:
+                pSky.setColor(getResources().getColor(R.color.colorBlack));
+                break;
+            case MidNoon:
+                pSky.setColor(getResources().getColor(R.color.colorSecondaryBlue));
+                break;
+            case Morning:
+                pSky.setColor(getResources().getColor(R.color.colorPrimarySky));
+                break;
+            case AfterNoon:
+                pSky.setColor(getResources().getColor(R.color.colorSecondaryGold));
+                break;
+            default:
+                break;
+        }
+
         Rect rSky = new Rect(0, 0, mCanvasWith, (int) (mCanvasHigh * 0.3));
         mCanvas.drawRect(rSky, pSky);
         //太阳
@@ -290,18 +322,25 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         mCanvas.drawRect(rSea, pSea);
         //游戏其他元素
         for (GameItemView view : gameItems) {
-            Bitmap bootBit = view.getBitmap();
-            int highBuff = 0;
-            if (view instanceof MainBoot) {
-                highBuff = (int) (bootBit.getHeight() * 0.8);
+            if (view instanceof GameItemBitmapView) {
+                GameItemBitmapView bitmapView = (GameItemBitmapView) view;
+                Bitmap bootBit = bitmapView.getBitmap();
+                int highBuff = 0;
+                if (view instanceof MainBoot) {
+                    highBuff = (int) (bootBit.getHeight() * 0.8);
+                }
+                int viewLeft = (int) (mCanvasWith * view.getPosition().getX());
+                int viewTop = (int) (mCanvasHigh * view.getPosition().getY()) - highBuff;
+                int viewBitWidth = bootBit.getWidth();
+                int viewBitHeight = bootBit.getHeight();
+                Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
+                Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
+                mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
             }
-            int viewLeft = (int) (mCanvasWith * view.getPosition().getX());
-            int viewTop = (int) (mCanvasHigh * view.getPosition().getY()) - highBuff;
-            int viewBitWidth = bootBit.getWidth();
-            int viewBitHeight = bootBit.getHeight();
-            Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
-            Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
-            mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
+            if (view instanceof GameItemDrawView) {
+                GameItemDrawView drawView = (GameItemDrawView) view;
+                drawView.draw(mCanvas, pCloud);
+            }
         }
     }
 

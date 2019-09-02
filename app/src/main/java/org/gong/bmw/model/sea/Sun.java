@@ -1,7 +1,5 @@
 package org.gong.bmw.model.sea;
 
-import net.gtr.framework.util.Loger;
-
 /**
  * Created by caroline on 2018/7/11.
  */
@@ -28,13 +26,11 @@ public class Sun extends Aster {
 
 
     public float getCx() {
-        float x1 = (float) (r * Math.cos(getAngel()));
-        return x - x1;
+        return x - (float) (r * Math.cos(getAngel()));
     }
 
     public float getCy() {
-        float y1 = (float) (r * Math.sin(getAngel()));
-        return y - y1;
+        return y - (float) (r * Math.sin(getAngel()));
     }
 
 }

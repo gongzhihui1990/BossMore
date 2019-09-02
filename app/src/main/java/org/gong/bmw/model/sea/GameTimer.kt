@@ -28,7 +28,7 @@ class GameTimer private constructor() {
             now < DAY_LEN_18 -> GameTimeType.AfterNoon
             now > DAY_LEN_20 -> GameTimeType.Night
             else -> {
-                GameTimeType.Morning
+                GameTimeType.Night
             }
         }
     }

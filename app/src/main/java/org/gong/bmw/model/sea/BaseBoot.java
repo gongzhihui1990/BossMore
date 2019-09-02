@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import net.gtr.framework.util.Loger;
 
 import org.gong.bmw.control.BootController;
-import org.gong.bmw.model.GameItemView;
+import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GamePoint;
 
 import java.util.UUID;
@@ -16,7 +16,7 @@ import java.util.UUID;
  * @date 2018/6/27
  */
 
-public abstract class BaseBoot extends GameItemView implements GameBoot {
+public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     /**
      * 边界屏幕宽度千分比
      */

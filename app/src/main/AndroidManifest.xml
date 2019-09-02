@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.gong.bmw">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -9,6 +14,7 @@
         android:roundIcon="@mipmap/icons8_skull"
         android:supportsRtl="true"
         android:theme="@style/FullWindowTheme">
+
         <activity
             android:name=".view.SplashActivity"
             android:screenOrientation="portrait"
@@ -25,5 +31,7 @@
         <activity
             android:name=".view.PlayActivity"
             android:screenOrientation="landscape" />
+        <activity android:name=".view.BLEActivity" />
+        <activity android:name=".view.BLSActivity" />
     </application>
 </manifest>

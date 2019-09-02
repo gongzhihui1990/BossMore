@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import kotlinx.android.synthetic.main.layout_main.*
 import org.gong.bmw.R
+import java.util.*
 
 /**
  *
@@ -17,13 +18,19 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val ag = Math.PI * 210 / 180
-        tvMain.text = String.format("%s %s", "欢迎使用\n" +"角度"+ag+"\ncos 210="+ format(Math.cos(ag)) + "\nsin 210=" + format(Math.sin(ag)), getString(R.string.my_app_name))
+        tvMain.text = String.format("%s %s", "欢迎使用", getString(R.string.my_app_name))
         btnStart.setOnClickListener({ startActivity(Intent(this@MainActivity, PlayActivity::class.java)) })
+        btnConnect.setOnClickListener({ startActivity(Intent(this@MainActivity, BLEActivity::class.java)) })
         btnQuit.setOnClickListener({ this@MainActivity.finish() })
+        btnSend.setOnClickListener({
+            val intent = Intent("com.xilai.express.delivery")
+            intent.flags=Intent.FLAG_INCLUDE_STOPPED_PACKAGES
+            intent.putExtra("data", "from " + packageName + "." + Date().toGMTString())
+            sendBroadcast(intent)
+        })
     }
 
-    fun format(number: Number):String{
-        return String.format("%.3f",number)
+    fun format(number: Number): String {
+        return String.format("%.3f", number)
     }
 }

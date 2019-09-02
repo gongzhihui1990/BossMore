@@ -1,7 +1,5 @@
 package org.gong.bmw.model;
 
-import android.graphics.Bitmap;
-
 import org.gong.bmw.control.GameItemInterface;
 import org.gong.bmw.control.Movable;
 
@@ -11,12 +9,6 @@ import org.gong.bmw.control.Movable;
  */
 
 public abstract class GameItemView implements GameItemInterface<GameItemState>, Movable {
-    /**
-     * 返回view的bitmap
-     *
-     * @return view的图片
-     */
-    public abstract Bitmap getBitmap();
 
     /**
      * 返回view的位置

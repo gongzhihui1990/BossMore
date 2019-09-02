@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory;
 import org.gong.bmw.App;
 import org.gong.bmw.R;
 import org.gong.bmw.model.GameItemState;
-import org.gong.bmw.model.GameItemView;
+import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GamePoint;
 
 /**
@@ -14,7 +14,7 @@ import org.gong.bmw.model.GamePoint;
  * @date 2018/6/28
  */
 
-public class WaterBomb extends GameItemView {
+public class WaterBomb extends GameItemBitmapView {
     private static Bitmap imageCache;
     private static Bitmap imageCacheBomb;
     /**

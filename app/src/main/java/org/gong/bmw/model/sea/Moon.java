@@ -29,23 +29,13 @@ public class Moon extends Aster {
         return imageCache;
     }
 
-    public float getX1() {
-        float x1 = (float) (r * Math.cos(getAngel()));
-        return x1;
-    }
-
-    public float getY1() {
-        float y1 = (float) (r * Math.sin(getAngel()));
-        return y1;
-    }
-
     public float getCx() {
-        float x1 = getX1();
+        float x1 = (float) (r * Math.cos(getAngel()));
         return x - x1;
     }
 
     public float getCy() {
-        float y1 = getY1();
+        float y1 = (float) (r * Math.sin(getAngel()));
         return y - y1;
     }
 

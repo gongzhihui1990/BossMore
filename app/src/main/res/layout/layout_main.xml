@@ -45,7 +45,21 @@
             android:layout_height="wrap_content"
             android:text="@string/action_start_game"
             android:textSize="@dimen/big_text_size" />
+        <Button
+            android:layout_margin="@dimen/dimen_4"
+            android:id="@+id/btnConnect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bt_connect"
+            android:textSize="@dimen/big_text_size" />
 
+        <Button
+            android:layout_margin="@dimen/dimen_4"
+            android:id="@+id/btnSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="发送广播"
+            android:textSize="@dimen/big_text_size" />
         <Button
             android:layout_margin="@dimen/dimen_4"
             android:id="@+id/btnQuit"

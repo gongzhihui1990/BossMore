@@ -11,12 +11,12 @@ public abstract class Aster {
 
     public Aster(int mCanvasWith, int mCanvasHigh) {
         x = (float) (mCanvasWith * 0.5);
-        y = (float) (mCanvasHigh * 0.75);
+        y = (float) (mCanvasHigh * 0.7);
         r = (float) (mCanvasHigh * 0.75);
     }
 
     protected final double getAngel() {
-        float angel = 360 * GameTimer.Companion.getInstance().getPercent();
+        float angel = 360 - 360 * GameTimer.Companion.getInstance().getPercent() % 360;
         angel += getCircumference();
         return Math.PI * angel / 180;
     }
