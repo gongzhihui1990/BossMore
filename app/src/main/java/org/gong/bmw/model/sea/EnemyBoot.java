@@ -44,7 +44,10 @@ public abstract class EnemyBoot extends BaseBoot {
         }
     }
 
+    @Override
+    public void joystick(int angle, int strength) {
 
+    }
     public void fade() {
         enemyBootState = new EnemyBootState(State.end);
     }

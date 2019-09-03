@@ -68,6 +68,7 @@ dependencies {
 
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation 'io.github.controlwear:virtualjoystick:1.10.1'
 
 }
 repositories {

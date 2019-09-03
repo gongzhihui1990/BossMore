@@ -34,4 +34,5 @@ public class U26 extends EnemyBoot {
     }
 
 
+
 }

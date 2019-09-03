@@ -1,15 +1,11 @@
 package org.gong.bmw.control;
 
-import android.support.annotation.NonNull;
-
-import org.jetbrains.annotations.Nullable;
-
 /**
  * @author caroline
  * @date 2018/6/27
  */
 
-public interface BootController /*extends  GameItemInterface*/{
+public interface BootController {
     /**
      * 发送控制码
      *
@@ -18,32 +14,14 @@ public interface BootController /*extends  GameItemInterface*/{
      */
     boolean receiveCode(Code code);
 
+    void joystick(int angle, int strength);
+
 
     enum Code {
-        NewEnemy,ClearEnemy, Left, Right, Stop,Sink,ReleaseBomb;
-
-
-//        @NonNull
-//        public Scope getScope() {
-//            switch (this) {
-//                case NewEnemy:
-//                    return Scope.EnemyBoot;
-//                case ClearEnemy:
-//                    return Scope.EnemyBoot;
-//                case Left:
-//                    return Scope.MainBoot;
-//                case Right:
-//                    return Scope.MainBoot;
-//                case Stop:
-//                    return Scope.MainBoot;
-//                default:
-//                    return Scope.All;
-//            }
-//        }
+        NewEnemy, ClearEnemy, Left, Right, Stop, Sink, ReleaseBomb;
     }
 
     enum Scope {
         MainBoot, EnemyBoot, All,
-
     }
 }

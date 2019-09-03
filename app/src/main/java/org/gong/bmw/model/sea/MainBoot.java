@@ -53,6 +53,11 @@ public final class MainBoot extends BaseBoot {
     }
 
     @Override
+    public void joystick(int angle, int strength) {
+
+    }
+
+    @Override
     public Bitmap getBitmap() {
         if (imageCache == null) {
             imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_boot);

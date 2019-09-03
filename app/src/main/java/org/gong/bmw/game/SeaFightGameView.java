@@ -22,7 +22,6 @@ import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GameItemDrawView;
 import org.gong.bmw.model.GameItemView;
 import org.gong.bmw.model.GamePoint;
-import org.gong.bmw.model.sea.Cloud;
 import org.gong.bmw.model.sea.EnemyBoot;
 import org.gong.bmw.model.sea.Fish;
 import org.gong.bmw.model.sea.GameTimer;
@@ -79,6 +78,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
     private Moon moon;
 
     private GameTimer gameTimer = GameTimer.Companion.getInstance();
+    private int maxEnemyBootSize = 5;
 
     public SeaFightGameView(Context context, @NonNull GameController controller) {
         super(context);
@@ -106,39 +106,60 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         mSurfaceHolder = holder;
         mIsRunning = true;
         MainBoot mainBoot = new MainBoot(getContext());
-        final BootController proxyController = code -> {
-            synchronized (mSurfaceHolder) {
-                switch (code) {
-                    case ReleaseBomb:
-                        if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
-                            WaterBomb bomb = new WaterBomb();
-                            bomb.releaseAt(mainBoot.getPosition());
-                            mainBoot.receiveCode(BootController.Code.ReleaseBomb);
-                            gameItems.add(bomb);
-                        }
+        final BootController proxyController =
+                new BootController() {
+                    @Override
+                    public boolean receiveCode(Code code) {
+                        synchronized (mSurfaceHolder) {
+                            switch (code) {
+                                case ReleaseBomb:
+                                    if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
+                                        WaterBomb bomb = new WaterBomb();
+                                        bomb.releaseAt(mainBoot.getPosition());
+                                        mainBoot.receiveCode(BootController.Code.ReleaseBomb);
+                                        gameItems.add(bomb);
+                                    }
 
-                        break;
-                    case ClearEnemy:
-                        for (GameItemView gameItemView : gameItems) {
-                            if (gameItemView instanceof EnemyBoot) {
-                                ((EnemyBoot) gameItemView).fade();
+                                    break;
+                                case ClearEnemy:
+                                    for (GameItemView gameItemView : gameItems) {
+                                        if (gameItemView instanceof EnemyBoot) {
+                                            ((EnemyBoot) gameItemView).fade();
+                                        }
+                                    }
+                                    break;
+                                case NewEnemy:
+                                    if (gameItems.size() > 8) {
+                                        return false;
+                                    }
+                                    gameItems.add(new U26(getContext()));
+                                    break;
+
+                                default:
+                                    mainBoot.receiveCode(code);
+                                    break;
                             }
                         }
-                        break;
-                    case NewEnemy:
-                        if (gameItems.size() > 8) {
-                            return false;
-                        }
-                        gameItems.add(new U26(getContext()));
-                        break;
+                        return true;
+                    }
 
-                    default:
-                        mainBoot.receiveCode(code);
-                        break;
-                }
-            }
-            return true;
-        };
+                    @Override
+                    public void joystick(int angle, int strength) {
+                        if (angle == 0) {
+                            mainBoot.receiveCode(BootController.Code.Stop);
+                            return;
+                        }
+                        if (angle < 90 || angle > 270) {
+                            mainBoot.receiveCode(Code.Right);
+                            return;
+                        }
+                        if (angle > 90 && angle < 270) {
+                            mainBoot.receiveCode(Code.Left);
+                            return;
+                        }
+                    }
+                };
+
         mGameController.onPlayerControllerPrepared(proxyController);
         gameItems.add(mainBoot);
 
@@ -177,16 +198,16 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         double random = Math.random();
                         Loger.INSTANCE.d("random: " + random);
                         if (random * 100 > 96) {
-                            Cloud cloud = new Cloud(mCanvasHigh, mCanvasWith);
-                            gameItems.add(cloud);
+//                            Cloud cloud = new Cloud(mCanvasHigh, mCanvasWith);
+//                            gameItems.add(cloud);
                         }
-                        if (enemyBootSize < 10 && random * 100 < 3) {
+                        if (enemyBootSize < maxEnemyBootSize && random * 100 < 3) {
                             gameItems.add(new U26(getContext()));
                         }
-                        if (enemyBootSize < 10 && random * 100 < 15 && random * 100 > 10) {
+                        if (enemyBootSize < maxEnemyBootSize && random * 100 < 15 && random * 100 > 10) {
                             gameItems.add(new U21(getContext()));
                         }
-                        if (enemyBootSize < 10 && random * 100 < 20 && random * 100 > 15) {
+                        if (enemyBootSize < maxEnemyBootSize && random * 100 < 20 && random * 100 > 15) {
                             gameItems.add(new Fish(getContext()));
                         }
                         //元素移动
