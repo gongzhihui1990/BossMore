@@ -52,8 +52,11 @@ class PlayActivity : BaseActivity() {
 
         private var state = GameState.Run
         override fun gameOver(score: ScoreBoard) {
+            if (state == GameState.GameOver) {
+                return
+            }
             state = GameState.GameOver
-            //TODO
+            //TODO GameOver Score
             ToastUtil.show("GameOver Score")
         }
 

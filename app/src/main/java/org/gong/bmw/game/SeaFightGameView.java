@@ -124,7 +124,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                                             mainBoot.joyButton(BootController.Code.ReleaseBomb);
                                             gameItems.add(bomb);
                                         } else {
-                                            onGameOver(2);
+                                            onGameOver();
                                         }
                                     }
                                     break;
@@ -216,7 +216,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                             if (itemView instanceof MainBoot) {
                                 if (BaseBoot.Direct.Stay != ((MainBoot) itemView).getDirect()) {
                                     if (!scoreBoard.useOil()) {
-                                        onGameOver(1);
+                                        onGameOver();
                                     }
                                 }
 
@@ -277,8 +277,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                     if (GameTimer.Companion.getInstance().changed()) {
                         //时间变化。消耗食物
                         if (!scoreBoard.useFood()) {
-                            //TODO GAME-OVER
-                            onGameOver(3);
+                            onGameOver();
                         }
                     }
                     //背景
@@ -368,8 +367,8 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         }
     }
 
-    private void onGameOver(int overCode) {
-        mGameController.gameOver();
+    private void onGameOver() {
+        mGameController.gameOver(scoreBoard);
     }
 
     @Override
