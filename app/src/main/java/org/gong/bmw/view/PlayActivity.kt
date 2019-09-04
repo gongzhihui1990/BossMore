@@ -2,12 +2,13 @@ package org.gong.bmw.view
 
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_play.*
+import net.gtr.framework.util.ToastUtil
 import org.gong.bmw.R
 import org.gong.bmw.control.BootController
 import org.gong.bmw.control.GameController
-import org.gong.bmw.game.GameUserCallBack
 import org.gong.bmw.game.SeaFightGameView
 import org.gong.bmw.model.GameState
+import org.gong.bmw.model.sea.ScoreBoard
 
 /**
  *
@@ -15,46 +16,7 @@ import org.gong.bmw.model.GameState
  * @date 2018/6/27
  */
 
-class PlayActivity : BaseActivity(), GameUserCallBack {
-    var oil = 100
-    var food = 100
-    var bomb = 100
-    private fun initSource() {
-        oil = 100
-        food = 100
-        bomb = 100
-        renderSource()
-    }
-
-    private fun renderSource() {
-        this@PlayActivity.tvOil.text = "" + oil
-        this@PlayActivity.tvFood.text = "" + food
-        this@PlayActivity.tvBomb.text = "" + bomb
-    }
-
-    override fun onAddOil(size: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onUseBomb(size: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onAddBomb(size: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onUseFood(size: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onAddFood(size: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onUseOil(size: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class PlayActivity : BaseActivity() {
 
     override val layoutR: Int
         get() = R.layout.activity_play
@@ -62,31 +24,41 @@ class PlayActivity : BaseActivity(), GameUserCallBack {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         rootView.addView(SeaFightGameView(this, MainGameController()))
-        initSource()
     }
 
     inner class MainGameController : GameController {
 
         override fun onPlayerControllerPrepared(bootController: BootController) {
-            this@PlayActivity.btnSwitch.setOnClickListener { start = !start }
-            this@PlayActivity.btnAdd.setOnClickListener {
-                bootController.receiveCode(BootController.Code.NewEnemy)
+            this@PlayActivity.btnSwitch.setOnClickListener {
+                start = !start
+                if (start) {
+                    GameState.Run
+                } else {
+                    GameState.Pause
+                }
             }
-            this@PlayActivity.btnRelease.setOnClickListener { bootController.receiveCode(BootController.Code.ReleaseBomb) }
+            this@PlayActivity.btnAdd.setOnClickListener {
+                bootController.joyButton(BootController.Code.NewEnemy)
+            }
+            this@PlayActivity.btnRelease.setOnClickListener { bootController.joyButton(BootController.Code.ReleaseBomb) }
             this@PlayActivity.joystickView.setOnMoveListener { angle, strength ->
                 run {
-                    bootController.joystick(angle, strength)
+                    bootController.joyStick(angle, strength)
                 }
             }
         }
 
         var start: Boolean = true
 
+        private var state = GameState.Run
+        override fun gameOver(score: ScoreBoard) {
+            state = GameState.GameOver
+            //TODO
+            ToastUtil.show("GameOver Score")
+        }
+
         override fun getGameState(): GameState {
-            if (start) {
-                return GameState.Run
-            }
-            return GameState.Pause
+            return state
         }
 
     }

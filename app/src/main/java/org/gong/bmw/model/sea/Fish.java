@@ -24,6 +24,10 @@ public class Fish extends EnemyBoot {
         setSpeed(Speed.L3);
     }
 
+    @Override
+    public int getScore() {
+        return 1;
+    }
 
     @Override
     public Bitmap getBitmap() {

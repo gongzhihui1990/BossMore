@@ -18,7 +18,17 @@ class GameTimer private constructor() {
     }
 
     fun getPercent(): Float {
-            return now.toFloat() / DAY_LEN
+        return now.toFloat() / DAY_LEN
+    }
+
+    var cur = getTimeType()
+    fun changed(): Boolean {
+        val t = getTimeType()
+        if (t == cur) {
+            return false
+        }
+        cur = t
+        return true
     }
 
     fun getTimeType(): GameTimeType {

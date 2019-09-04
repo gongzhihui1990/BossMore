@@ -31,4 +31,8 @@ public class U21 extends EnemyBoot {
         return imageCache;
     }
 
+    @Override
+    public int getScore() {
+        return 8;
+    }
 }

@@ -45,9 +45,10 @@ public abstract class EnemyBoot extends BaseBoot {
     }
 
     @Override
-    public void joystick(int angle, int strength) {
+    public void joyStick(int angle, int strength) {
 
     }
+
     public void fade() {
         enemyBootState = new EnemyBootState(State.end);
     }
@@ -70,7 +71,16 @@ public abstract class EnemyBoot extends BaseBoot {
             enemyBootState = new EnemyBootState(State.shot);
         }
         context.sendBroadcast(new Intent("com.xilai.express.playaudio_start"));
-        receiveCode(Code.Sink);
+        joyButton(Code.Sink);
+    }
+
+    public int getScore() {
+        return 5;
+    }
+
+    @Override
+    public BootController getController() {
+        return this;
     }
 
     public enum State {
@@ -102,9 +112,5 @@ public abstract class EnemyBoot extends BaseBoot {
         public String toString() {
             return state.toString();
         }
-    }
-    @Override
-    public BootController getController() {
-        return this;
     }
 }

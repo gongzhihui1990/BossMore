@@ -3,8 +3,6 @@ package org.gong.bmw.model.sea;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import net.gtr.framework.util.Loger;
-
 import org.gong.bmw.control.BootController;
 import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GamePoint;
@@ -96,8 +94,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     }
 
     @Override
-    public boolean receiveCode(BootController.Code code) {
-        Loger.INSTANCE.e("receiveCode:" + code);
+    public boolean joyButton(BootController.Code code) {
         switch (code) {
             case Right:
                 direct = Direct.Right;

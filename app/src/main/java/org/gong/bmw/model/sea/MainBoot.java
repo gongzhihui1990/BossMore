@@ -42,19 +42,25 @@ public final class MainBoot extends BaseBoot {
     }
 
     @Override
-    public boolean receiveCode(Code code) {
+    public boolean joyButton(Code code) {
         switch (code) {
             case ReleaseBomb:
                 bootState = new MainBootState(State.sendBomb);
                 return true;
             default:
-                return super.receiveCode(code);
+                return super.joyButton(code);
         }
     }
 
     @Override
-    public void joystick(int angle, int strength) {
-
+    public void joyStick(int angle, int strength) {
+        if ((angle > 0 && angle < 90) || angle > 270) {
+            joyButton(Code.Right);
+        } else if (angle > 90 && angle < 270) {
+            joyButton(Code.Left);
+        } else {
+            joyButton(BootController.Code.Stop);
+        }
     }
 
     @Override

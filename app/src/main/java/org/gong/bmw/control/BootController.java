@@ -7,21 +7,23 @@ package org.gong.bmw.control;
 
 public interface BootController {
     /**
-     * 发送控制码
+     * 接受手柄按键输入
      *
      * @param code
      * @return 是否成功执行
      */
-    boolean receiveCode(Code code);
+    boolean joyButton(Code code);
 
-    void joystick(int angle, int strength);
+    /**
+     * 接受手柄摇杆输入
+     * @param angle
+     * @param strength
+     */
+    void joyStick(int angle, int strength);
 
 
     enum Code {
         NewEnemy, ClearEnemy, Left, Right, Stop, Sink, ReleaseBomb;
     }
 
-    enum Scope {
-        MainBoot, EnemyBoot, All,
-    }
 }

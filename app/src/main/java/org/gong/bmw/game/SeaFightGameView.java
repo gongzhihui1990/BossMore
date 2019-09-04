@@ -22,11 +22,13 @@ import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GameItemDrawView;
 import org.gong.bmw.model.GameItemView;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.sea.BaseBoot;
 import org.gong.bmw.model.sea.EnemyBoot;
 import org.gong.bmw.model.sea.Fish;
 import org.gong.bmw.model.sea.GameTimer;
 import org.gong.bmw.model.sea.MainBoot;
 import org.gong.bmw.model.sea.Moon;
+import org.gong.bmw.model.sea.ScoreBoard;
 import org.gong.bmw.model.sea.Sun;
 import org.gong.bmw.model.sea.U21;
 import org.gong.bmw.model.sea.U26;
@@ -77,6 +79,8 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
     private Sun sun;
     private Moon moon;
 
+
+    private ScoreBoard scoreBoard;
     private GameTimer gameTimer = GameTimer.Companion.getInstance();
     private int maxEnemyBootSize = 5;
 
@@ -106,20 +110,23 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         mSurfaceHolder = holder;
         mIsRunning = true;
         MainBoot mainBoot = new MainBoot(getContext());
-        final BootController proxyController =
+        final BootController playController =
                 new BootController() {
                     @Override
-                    public boolean receiveCode(Code code) {
+                    public boolean joyButton(Code code) {
                         synchronized (mSurfaceHolder) {
                             switch (code) {
                                 case ReleaseBomb:
                                     if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
-                                        WaterBomb bomb = new WaterBomb();
-                                        bomb.releaseAt(mainBoot.getPosition());
-                                        mainBoot.receiveCode(BootController.Code.ReleaseBomb);
-                                        gameItems.add(bomb);
+                                        if (scoreBoard.useBoom()) {
+                                            WaterBomb bomb = new WaterBomb();
+                                            bomb.releaseAt(mainBoot.getPosition());
+                                            mainBoot.joyButton(BootController.Code.ReleaseBomb);
+                                            gameItems.add(bomb);
+                                        } else {
+                                            onGameOver(2);
+                                        }
                                     }
-
                                     break;
                                 case ClearEnemy:
                                     for (GameItemView gameItemView : gameItems) {
@@ -134,9 +141,8 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                                     }
                                     gameItems.add(new U26(getContext()));
                                     break;
-
                                 default:
-                                    mainBoot.receiveCode(code);
+                                    mainBoot.joyButton(code);
                                     break;
                             }
                         }
@@ -144,23 +150,12 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                     }
 
                     @Override
-                    public void joystick(int angle, int strength) {
-                        if (angle == 0) {
-                            mainBoot.receiveCode(BootController.Code.Stop);
-                            return;
-                        }
-                        if (angle < 90 || angle > 270) {
-                            mainBoot.receiveCode(Code.Right);
-                            return;
-                        }
-                        if (angle > 90 && angle < 270) {
-                            mainBoot.receiveCode(Code.Left);
-                            return;
-                        }
+                    public void joyStick(int angle, int strength) {
+                        mainBoot.joyStick(angle, strength);
                     }
                 };
 
-        mGameController.onPlayerControllerPrepared(proxyController);
+        mGameController.onPlayerControllerPrepared(playController);
         gameItems.add(mainBoot);
 
         new GameThread(this).start();
@@ -197,10 +192,10 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         }
                         double random = Math.random();
                         Loger.INSTANCE.d("random: " + random);
-                        if (random * 100 > 96) {
+//                        if (random * 100 > 96) {
 //                            Cloud cloud = new Cloud(mCanvasHigh, mCanvasWith);
 //                            gameItems.add(cloud);
-                        }
+//                        }
                         if (enemyBootSize < maxEnemyBootSize && random * 100 < 3) {
                             gameItems.add(new U26(getContext()));
                         }
@@ -218,6 +213,14 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         List<EnemyBoot> enemyBoots = new ArrayList<>();
                         List<WaterBomb> bombs = new ArrayList<>();
                         for (GameItemView itemView : gameItems) {
+                            if (itemView instanceof MainBoot) {
+                                if (BaseBoot.Direct.Stay != ((MainBoot) itemView).getDirect()) {
+                                    if (!scoreBoard.useOil()) {
+                                        onGameOver(1);
+                                    }
+                                }
+
+                            }
                             if (itemView instanceof EnemyBoot) {
                                 enemyBoots.add((EnemyBoot) itemView);
                             }
@@ -230,6 +233,8 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                                 if (crashed(enemyBoot, bomb)) {
                                     bomb.bomb();
                                     enemyBoot.bomb();
+                                    assert (scoreBoard != null);
+                                    scoreBoard.addScore(enemyBoot.getScore());
                                 }
                             }
                         }
@@ -246,12 +251,97 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                     case Pause:
                         //TODO
                         break;
+                    case GameOver:
+                        //TODO
+                        break;
+
                     default:
                         break;
                 }
                 try {
                     mCanvas = mSurfaceHolder.lockCanvas();
-                    drawing();
+                    //绘制游戏--开始
+                    mCanvasWith = mCanvas.getWidth();
+                    mCanvasHigh = mCanvas.getHeight();
+                    if (sun == null) {
+                        sun = new Sun(mCanvasWith, mCanvasHigh);
+                    }
+                    if (moon == null) {
+                        moon = new Moon(mCanvasWith, mCanvasHigh);
+                    }
+                    if (scoreBoard == null) {
+                        scoreBoard = new ScoreBoard(mCanvasWith, mCanvasHigh);
+                    }
+
+                    //绘制：远-近
+                    if (GameTimer.Companion.getInstance().changed()) {
+                        //时间变化。消耗食物
+                        if (!scoreBoard.useFood()) {
+                            //TODO GAME-OVER
+                            onGameOver(3);
+                        }
+                    }
+                    //背景
+                    mCanvas.drawColor(Color.WHITE);
+                    switch (GameTimer.Companion.getInstance().getTimeType()) {
+                        case Night:
+                            pSky.setColor(getResources().getColor(R.color.colorBlack));
+                            break;
+                        case MidNoon:
+                            pSky.setColor(getResources().getColor(R.color.colorSecondaryBlue));
+                            break;
+                        case Morning:
+                            pSky.setColor(getResources().getColor(R.color.colorPrimarySky));
+                            break;
+                        case AfterNoon:
+                            pSky.setColor(getResources().getColor(R.color.colorSecondaryGold));
+                            break;
+                        default:
+                            break;
+                    }
+                    //天空
+                    Rect rSky = new Rect(0, 0, mCanvasWith, (int) (mCanvasHigh * 0.3));
+                    mCanvas.drawRect(rSky, pSky);
+                    //绘制分数板
+                    scoreBoard.draw(mCanvas, getContext(), GameTimer.Companion.getInstance().getTimeType());
+                    //太阳
+                    mCanvas.drawCircle(sun.getCx(), sun.getCy(), sun.getCr(), pSun);
+                    //月亮
+                    int moonLeft = (int) (moon.getCx());
+                    int moonTop = (int) (moon.getCy());
+                    Bitmap moonBit = moon.getBitmap();
+                    int moonBitWidth = moonBit.getWidth();
+                    int moonBitHeight = moonBit.getHeight();
+                    Rect moonSrcRect = new Rect(0, 0, moonBitWidth, moonBitHeight);
+                    Rect moonDesRect = new Rect(moonLeft, moonTop, moonLeft + moonBitWidth, moonTop + moonBitHeight);
+                    mCanvas.drawBitmap(moonBit, moonSrcRect, moonDesRect, null);
+                    //大海
+                    Rect rSea = new Rect(0, (int) (mCanvasHigh * 0.3), mCanvasWith, mCanvasHigh);
+                    mCanvas.drawRect(rSea, pSea);
+                    //游戏其他元素
+                    for (GameItemView view : gameItems) {
+                        if (view instanceof GameItemBitmapView) {
+                            GameItemBitmapView bitmapView = (GameItemBitmapView) view;
+                            Bitmap bootBit = bitmapView.getBitmap();
+                            int highBuff = 0;
+                            if (view instanceof MainBoot) {
+                                highBuff = (int) (bootBit.getHeight() * 0.8);
+                            }
+                            int viewLeft = (int) (mCanvasWith * view.getPosition().getX());
+                            int viewTop = (int) (mCanvasHigh * view.getPosition().getY()) - highBuff;
+                            int viewBitWidth = bootBit.getWidth();
+                            int viewBitHeight = bootBit.getHeight();
+                            Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
+                            Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
+                            mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
+                        }
+                        if (view instanceof GameItemDrawView) {
+                            GameItemDrawView drawView = (GameItemDrawView) view;
+                            drawView.draw(mCanvas, pCloud);
+                        }
+                    }
+
+                    //绘制游戏--结束
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -259,6 +349,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         mSurfaceHolder.unlockCanvasAndPost(mCanvas);
                     }
                 }
+
             }
 
             /**取得更新结束的时间**/
@@ -275,6 +366,10 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
 
             }
         }
+    }
+
+    private void onGameOver(int overCode) {
+        mGameController.gameOver();
     }
 
     @Override
@@ -294,76 +389,6 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         return true;
     }
 
-    private void drawing() {
-        mCanvasWith = mCanvas.getWidth();
-        mCanvasHigh = mCanvas.getHeight();
-        if (sun == null) {
-            sun = new Sun(mCanvasWith, mCanvasHigh);
-        }
-        if (moon == null) {
-            moon = new Moon(mCanvasWith, mCanvasHigh);
-        }
-
-        //绘制：远-近
-
-        //背景
-        mCanvas.drawColor(Color.WHITE);
-        switch (GameTimer.Companion.getInstance().getTimeType()) {
-            case Night:
-                pSky.setColor(getResources().getColor(R.color.colorBlack));
-                break;
-            case MidNoon:
-                pSky.setColor(getResources().getColor(R.color.colorSecondaryBlue));
-                break;
-            case Morning:
-                pSky.setColor(getResources().getColor(R.color.colorPrimarySky));
-                break;
-            case AfterNoon:
-                pSky.setColor(getResources().getColor(R.color.colorSecondaryGold));
-                break;
-            default:
-                break;
-        }
-
-        Rect rSky = new Rect(0, 0, mCanvasWith, (int) (mCanvasHigh * 0.3));
-        mCanvas.drawRect(rSky, pSky);
-        //太阳
-        mCanvas.drawCircle(sun.getCx(), sun.getCy(), sun.getCr(), pSun);
-        //月亮
-        int moonLeft = (int) (moon.getCx());
-        int moonTop = (int) (moon.getCy());
-        Bitmap moonBit = moon.getBitmap();
-        int moonBitWidth = moonBit.getWidth();
-        int moonBitHeight = moonBit.getHeight();
-        Rect moonSrcRect = new Rect(0, 0, moonBitWidth, moonBitHeight);
-        Rect moonDesRect = new Rect(moonLeft, moonTop, moonLeft + moonBitWidth, moonTop + moonBitHeight);
-        mCanvas.drawBitmap(moonBit, moonSrcRect, moonDesRect, null);
-        //大海
-        Rect rSea = new Rect(0, (int) (mCanvasHigh * 0.3), mCanvasWith, mCanvasHigh);
-        mCanvas.drawRect(rSea, pSea);
-        //游戏其他元素
-        for (GameItemView view : gameItems) {
-            if (view instanceof GameItemBitmapView) {
-                GameItemBitmapView bitmapView = (GameItemBitmapView) view;
-                Bitmap bootBit = bitmapView.getBitmap();
-                int highBuff = 0;
-                if (view instanceof MainBoot) {
-                    highBuff = (int) (bootBit.getHeight() * 0.8);
-                }
-                int viewLeft = (int) (mCanvasWith * view.getPosition().getX());
-                int viewTop = (int) (mCanvasHigh * view.getPosition().getY()) - highBuff;
-                int viewBitWidth = bootBit.getWidth();
-                int viewBitHeight = bootBit.getHeight();
-                Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
-                Rect bootDesRect = new Rect(viewLeft, viewTop, viewLeft + viewBitWidth, viewTop + viewBitHeight);
-                mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
-            }
-            if (view instanceof GameItemDrawView) {
-                GameItemDrawView drawView = (GameItemDrawView) view;
-                drawView.draw(mCanvas, pCloud);
-            }
-        }
-    }
 
     private boolean crashed(EnemyBoot enemyBoot, WaterBomb bomb) {
 //        2. 矩形的碰撞检测方法1

@@ -7,5 +7,5 @@ package org.gong.bmw.model;
  */
 
 public enum GameState {
-    Run,Pause,
+    Run,Pause,GameOver
 }
