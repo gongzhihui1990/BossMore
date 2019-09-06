@@ -1,4 +1,4 @@
-package org.gong.bmw.model.sea;
+package org.gong.bmw.model.sea.enemy;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,7 +10,7 @@ import org.gong.bmw.R;
  * Created by caroline on 2018/6/28.
  */
 
-public class U21 extends EnemyBoot {
+public class U21 extends EnemyBaseBoot {
     private static Bitmap imageCache = null;
 
     public U21(Context context) {
@@ -18,9 +18,12 @@ public class U21 extends EnemyBoot {
     }
 
     @Override
-    public void init() {
-        setSpeed(Speed.L5);
+    public EnemyAbility getAbility() {
+        return EnemyAbility.Builder.create()
+                .setHP(1)
+                .setSpeed(Speed.L5).build();
     }
+
 
 
     @Override
@@ -32,7 +35,10 @@ public class U21 extends EnemyBoot {
     }
 
     @Override
-    public int getScore() {
-        return 8;
+    public EnemySupply getSupply() {
+        return EnemySupply.Builder.create(10)
+                .setBoom(3)
+                .setOil(3f)
+                .build();
     }
 }

@@ -23,7 +23,7 @@ public interface BootController {
 
 
     enum Code {
-        NewEnemy, ClearEnemy, Left, Right, Stop, Sink, ReleaseBomb;
+        NewEnemy, ClearEnemy, Left, Right, Stop, Sink, ReleaseBomb
     }
 
 }

@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen_12"
-        android:background="@mipmap/bombbed"
+        android:background="@mipmap/ic_boom_launch"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -61,45 +61,6 @@
         custom:JV_buttonSizeRatio="25%"
         custom:JV_fixedCenter="false" />
 
-    <LinearLayout
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlack"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/tvOil"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableStart="@mipmap/oil"
-            android:drawablePadding="8dp"
-            android:padding="8dp"
-            android:text="100"
-            android:textColor="@color/green_normal" />
-
-        <TextView
-            android:id="@+id/tvBomb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableStart="@mipmap/bomb"
-            android:drawablePadding="8dp"
-            android:padding="8dp"
-            android:text="100"
-            android:textColor="@color/green_normal" />
-
-        <TextView
-            android:id="@+id/tvFood"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableStart="@mipmap/food"
-            android:drawablePadding="8dp"
-            android:padding="8dp"
-            android:text="100"
-            android:textColor="@color/green_normal" />
-    </LinearLayout>
 
 
 </android.support.constraint.ConstraintLayout>

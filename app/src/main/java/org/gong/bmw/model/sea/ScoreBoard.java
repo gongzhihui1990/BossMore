@@ -9,12 +9,14 @@ import android.graphics.Rect;
 
 import org.gong.bmw.App;
 import org.gong.bmw.R;
+import org.gong.bmw.model.sea.enemy.EnemyBaseBoot;
+import org.gong.bmw.model.sea.enemy.EnemySupply;
 
 /**
  * @author: create by 龚志辉
  * @version: v1.0
  * @description: org.gong.bmw.model.sea
- * @date:2019-09-04
+ * @date:2019-09-04 记分板
  */
 public class ScoreBoard {
     protected int maxW;
@@ -47,13 +49,19 @@ public class ScoreBoard {
 
     }
 
-    public void addScore(int value) {
-        score += value;
+    public int getScore() {
+        return score;
     }
 
-    public void addFood() {
-        food++;
+
+    public void addToScore(EnemyBaseBoot enemyBoot) {
+        EnemySupply supply = enemyBoot.getSupply();
+        score += supply.getScore();
+        boom += supply.getBoom();
+        food += supply.getFood();
+        oil += supply.getOil();
     }
+
 
     public boolean useFood() {
         if (food <= 0) {
@@ -63,8 +71,9 @@ public class ScoreBoard {
         return true;
     }
 
-    public void addBoom() {
-        boom++;
+
+    public boolean hasBoom() {
+        return boom > 0;
     }
 
     public boolean useBoom() {
@@ -75,9 +84,6 @@ public class ScoreBoard {
         return true;
     }
 
-    public void addOil() {
-        boom++;
-    }
 
     public boolean useOil() {
         if (((int) oil) <= 0) {

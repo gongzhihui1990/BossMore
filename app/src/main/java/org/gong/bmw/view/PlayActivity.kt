@@ -1,7 +1,10 @@
 package org.gong.bmw.view
 
 import android.os.Bundle
+import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_play.*
+import net.gtr.framework.rx.ProgressObserverImplementation
+import net.gtr.framework.rx.RxHelper
 import net.gtr.framework.util.ToastUtil
 import org.gong.bmw.R
 import org.gong.bmw.control.BootController
@@ -57,7 +60,13 @@ class PlayActivity : BaseActivity() {
             }
             state = GameState.GameOver
             //TODO GameOver Score
-            ToastUtil.show("GameOver Score")
+            RxHelper.bindOnUI(Observable.just("GameOver Score"),
+                    object : ProgressObserverImplementation<String>(this@PlayActivity) {
+                        override fun onNext(t: String) {
+                            super.onNext(t)
+                            ToastUtil.show(t)
+                        }
+                    });
         }
 
         override fun getGameState(): GameState {

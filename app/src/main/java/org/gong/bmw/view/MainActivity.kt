@@ -19,15 +19,15 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tvMain.text = String.format("%s %s", "欢迎使用", getString(R.string.my_app_name))
-        btnStart.setOnClickListener({ startActivity(Intent(this@MainActivity, PlayActivity::class.java)) })
-        btnConnect.setOnClickListener({ startActivity(Intent(this@MainActivity, BLEActivity::class.java)) })
-        btnQuit.setOnClickListener({ this@MainActivity.finish() })
-        btnSend.setOnClickListener({
+        btnStart.setOnClickListener { startActivity(Intent(this@MainActivity, PlayActivity::class.java)) }
+        btnConnect.setOnClickListener { startActivity(Intent(this@MainActivity, BLEActivity::class.java)) }
+        btnQuit.setOnClickListener { this@MainActivity.finish() }
+        btnSend.setOnClickListener {
             val intent = Intent("com.xilai.express.delivery")
-            intent.flags=Intent.FLAG_INCLUDE_STOPPED_PACKAGES
+            intent.flags = Intent.FLAG_INCLUDE_STOPPED_PACKAGES
             intent.putExtra("data", "from " + packageName + "." + Date().toGMTString())
             sendBroadcast(intent)
-        })
+        }
     }
 
     fun format(number: Number): String {

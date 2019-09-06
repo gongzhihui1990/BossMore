@@ -37,7 +37,7 @@ public final class MainBoot extends BaseBoot {
     }
 
     @Override
-    void onMoved(boolean moved) {
+    public void setMoving(boolean moved) {
 
     }
 

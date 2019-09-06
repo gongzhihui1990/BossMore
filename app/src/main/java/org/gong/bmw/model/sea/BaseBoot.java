@@ -32,7 +32,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     private UUID uuid;
     private GamePoint point = new GamePoint(0, 0);
 
-    BaseBoot(Context context) {
+    public BaseBoot(Context context) {
         initBoot(context);
     }
 
@@ -119,20 +119,20 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
         super.move();
         switch (direct) {
             case Stay:
-                onMoved(false);
+                setMoving(false);
                 break;
             case Left:
                 if (getBoundaryX() != Boundary.Left) {
-                    onMoved(true);
+                    setMoving(true);
                     point.moveX(-speed);
                 } else {
                     direct = Direct.Stay;
                 }
                 break;
             case Right:
-                onMoved(true);
+                setMoving(true);
                 if (getBoundaryX() != Boundary.Right) {
-                    onMoved(true);
+                    setMoving(true);
                     point.moveX(speed);
                 } else {
                     direct = Direct.Stay;
@@ -140,7 +140,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
                 break;
             case Bottom:
                 if (getBoundaryY() != Boundary.Bottom) {
-                    onMoved(true);
+                    setMoving(true);
                     point.moveY(speed / 2);
                 } else {
                     direct = Direct.Stay;
@@ -148,7 +148,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
                 break;
             case Sink:
                 if (getBoundaryY() != Boundary.Bottom) {
-                    onMoved(true);
+                    setMoving(true);
                     point.move(-speed / 2, speed);
                 } else {
                     direct = Direct.Stay;
@@ -157,11 +157,16 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
             default:
                 break;
         }
-        onMoved(false);
+        setMoving(false);
     }
 
 
-    abstract void onMoved(boolean moved);
+    /**
+     * 设置当前是否在移动
+     *
+     * @param moved
+     */
+    public abstract void setMoving(boolean moved);
 
     @Override
     public GamePoint getPosition() {
@@ -173,8 +178,8 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     }
 
 
-    enum Speed {
-        L1(0.001f), L2(0.0012f), L3(0.002f), L4(0.0028f), L5(0.0032f);
+    public enum Speed {
+        L1(0.001f), L2(0.0012f), L3(0.002f), L4(0.0028f), L5(0.0032f), L6(0.0060f);
 
         float speed;
 
@@ -184,7 +189,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     }
 
 
-    enum Boundary {
+    public enum Boundary {
         Left, Mid, Right, Top, Bottom
     }
 

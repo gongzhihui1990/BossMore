@@ -12,11 +12,13 @@ import org.gong.bmw.model.GamePoint;
 /**
  * @author caroline
  * @date 2018/6/28
+ * 潜艇对船只发射的导弹
  */
 
-public class WaterBomb extends GameItemBitmapView {
+public class SubBomb extends GameItemBitmapView {
     private static Bitmap imageCache;
     private static Bitmap imageCacheBomb;
+    float x, y;
     private float rotation = 0;
     /**
      * 位置 0-1
@@ -25,11 +27,15 @@ public class WaterBomb extends GameItemBitmapView {
     /**
      * 速度屏幕宽度千分比
      */
-    private float speed = WaterBomb.Speed.L3.speed;
+    private float speed = SubBomb.Speed.L5.speed;
+    private float angelXY = 0f;
     private WaterBombState waterBombState = new WaterBombState(State.Run);
 
-    public WaterBomb releaseAt(GamePoint point) {
-        this.gamePoint = new GamePoint(point);
+    public SubBomb releaseAt(GamePoint sendPoint, GamePoint targetPoint) {
+        this.gamePoint = new GamePoint(sendPoint);
+        x = sendPoint.getX() - targetPoint.getX();
+        y = sendPoint.getY() - targetPoint.getY();
+        rotation = x / y;
         return this;
     }
 
@@ -59,9 +65,10 @@ public class WaterBomb extends GameItemBitmapView {
     public void move() {
         super.move();
         if (waterBombState.getState() == State.Run) {
-            gamePoint.moveY(speed);
-            if (gamePoint.getY() >= 0.95) {
-                //炸到海底
+            gamePoint.moveX(speed * (x / x + y));
+            gamePoint.moveY(speed * (y / x + y));
+            if (gamePoint.getY() <= 0.33) {
+                //炸天
                 bomb();
             }
         }
@@ -89,11 +96,6 @@ public class WaterBomb extends GameItemBitmapView {
     @Override
     public void setGameItemState(GameItemState state) {
         waterBombState = (WaterBombState) state;
-    }
-
-    public float rotation() {
-        rotation += 3;
-        return rotation;
     }
 
 
