@@ -19,6 +19,7 @@ public final class MainBoot extends BaseBoot {
     private transient Bitmap imageCache = null;
     private MainBootState bootState = new MainBootState(State.normal);
 
+
     public MainBoot(Context context) {
         super(context);
     }
@@ -27,7 +28,7 @@ public final class MainBoot extends BaseBoot {
     public void initBoot(Context context) {
         super.initBoot(context);
         //设置初始屏幕位置
-        setPoint(new GamePoint(0.5f, 0.3f));
+        setPoint(new GamePoint(0.5f, 0.2f));
         setSpeed(Speed.L5);
     }
 
@@ -95,12 +96,10 @@ public final class MainBoot extends BaseBoot {
                 case normal:
                     break;
                 case sendBomb:
-                    setTimes(5);
-                    setNextState(new MainBootState(State.loadingBomb));
+                    setNextStateCallBack(5, () -> new MainBootState(State.loadingBomb));
                     break;
                 case loadingBomb:
-                    setTimes(10);
-                    setNextState(new MainBootState(State.normal));
+                    setNextStateCallBack(10, () -> new MainBootState(State.normal));
                 default:
                     break;
             }

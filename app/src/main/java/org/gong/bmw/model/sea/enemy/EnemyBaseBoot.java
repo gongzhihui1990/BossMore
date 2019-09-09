@@ -26,7 +26,8 @@ public abstract class EnemyBaseBoot extends BaseBoot {
         this.context = context;
         EnemyAbility enemyAbility = getAbility();
         setDirect(Direct.Left);
-        setPoint(new GamePoint(1, 1.1f - (float) Math.random() * 0.8f));
+        float positionVertical = 0.9f - (float) (Math.random() * 0.5f);
+        setPoint(new GamePoint(1, positionVertical));
         setSpeed(enemyAbility.getSpeed());
         nowHP = enemyAbility.getHP();
     }
@@ -95,7 +96,7 @@ public abstract class EnemyBaseBoot extends BaseBoot {
     }
 
     private void bomb() {
-        if (enemyBootState.state == State.normal) {
+        if (enemyBootState.state != State.broken) {
             enemyBootState = new EnemyBootState(State.broken);
         }
         joyButton(Code.Sink);
@@ -116,7 +117,7 @@ public abstract class EnemyBaseBoot extends BaseBoot {
         if (attackCallBack != null) {
             attackCallBack.attack();
             attackCallBack = null;
-            setGameItemState();
+            enemyBootState = new EnemyBootState(State.normal);
         }
     }
 
@@ -124,7 +125,7 @@ public abstract class EnemyBaseBoot extends BaseBoot {
      * 敌人的状态
      */
     public enum State {
-        normal, broken, readyAttack, attacking, end
+        normal, broken, readyAttack, attacking, end,
     }
 
     public interface AttackCallBack {
@@ -142,18 +143,19 @@ public abstract class EnemyBaseBoot extends BaseBoot {
             this.state = state;
             switch (state) {
                 case normal:
-                    setTimes(200);
-                    setNextState(new EnemyBaseBoot.EnemyBootState(EnemyBaseBoot.State.readyAttack));
+                    setNextStateCallBack(100, () -> new EnemyBootState(State.readyAttack));
                     break;
                 case readyAttack:
-//                    setTimes(2000);
-//                    setNextState(new EnemyBaseBoot.EnemyBootState(EnemyBaseBoot.State.attacking));
+                    setNextStateCallBack(100, () -> new EnemyBootState(State.attacking));
                     break;
                 case attacking:
-//                    setTimes(2000);
-//                    setNextState(new EnemyBaseBoot.EnemyBootState(EnemyBaseBoot.State.normal));
+                    setNextStateCallBack(100, () -> new EnemyBootState(State.normal));
+                    break;
+                case broken:
+                    setNextStateCallBack(100, () -> new EnemyBootState(State.end));
                     break;
                 case end:
+                    setNextStateCallBack(1000, () -> new EnemyBootState(State.end));
                     break;
                 default:
                     break;

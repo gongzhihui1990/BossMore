@@ -1,7 +1,5 @@
 package org.gong.bmw.model;
 
-import net.gtr.framework.util.Loger;
-
 import org.gong.bmw.control.Changable;
 
 /**
@@ -11,16 +9,18 @@ import org.gong.bmw.control.Changable;
 
 public class GameItemState implements Changable {
     private int times = -1;
-    private GameItemState nextState;
+    private NextStateCallBack nextStateCallBack;
 
-
-    public void setTimes(int times) {
-        this.times = times;
+    /**
+     * @param delay
+     * @param callBack
+     */
+    public void setNextStateCallBack(int delay, NextStateCallBack callBack) {
+        this.times = delay;
+        this.nextStateCallBack = callBack;
     }
 
-    public void setNextState(GameItemState nextState) {
-        this.nextState = nextState;
-    }
+
 
     @Override
     public GameItemState changeTo() {
@@ -31,8 +31,8 @@ public class GameItemState implements Changable {
             times--;
             return this;
         }
-        if (nextState != null) {
-            return nextState;
+        if (nextStateCallBack != null) {
+            return nextStateCallBack.onNext();
         }
         return this;
     }

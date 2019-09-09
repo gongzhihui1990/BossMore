@@ -3,11 +3,15 @@ package org.gong.bmw.model.sea;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import net.gtr.framework.util.Loger;
+
 import org.gong.bmw.App;
 import org.gong.bmw.R;
+import org.gong.bmw.game.SeaFightGameView;
 import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GameItemState;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.sea.enemy.EnemyBaseBoot;
 
 /**
  * @author caroline
@@ -19,7 +23,6 @@ public class SubBomb extends GameItemBitmapView {
     private static Bitmap imageCache;
     private static Bitmap imageCacheBomb;
     float x, y;
-    private float rotation = 0;
     /**
      * 位置 0-1
      */
@@ -27,15 +30,23 @@ public class SubBomb extends GameItemBitmapView {
     /**
      * 速度屏幕宽度千分比
      */
-    private float speed = SubBomb.Speed.L5.speed;
+    private float speed = SubBomb.Speed.L3.speed;
     private float angelXY = 0f;
     private WaterBombState waterBombState = new WaterBombState(State.Run);
 
-    public SubBomb releaseAt(GamePoint sendPoint, GamePoint targetPoint) {
+    public SubBomb releaseAt(EnemyBaseBoot sender, MainBoot target) {
+        GamePoint sendPoint = sender.getPosition();
+        GamePoint targetPoint = new GamePoint(
+                target.getPosition().getX() + ((float) target.getBitmap().getWidth()) / (SeaFightGameView.getWith() * 2),
+                target.getPosition().getY() + ((float) target.getBitmap().getHeight()) / (SeaFightGameView.getHigh() * 2));
+        Loger.INSTANCE.w("sendPoint:" + sendPoint.getX() + "/" + sendPoint.getY());
+        Loger.INSTANCE.w("targetPoint:" + targetPoint.getX() + "/" + targetPoint.getY());
         this.gamePoint = new GamePoint(sendPoint);
-        x = sendPoint.getX() - targetPoint.getX();
-        y = sendPoint.getY() - targetPoint.getY();
-        rotation = x / y;
+        float tx = targetPoint.getX() - sendPoint.getX();
+        float ty = targetPoint.getY() - sendPoint.getY();
+        x = (float) (tx / Math.sqrt(tx * tx + ty * ty));
+        y = (float) (ty / Math.sqrt(tx * tx + ty * ty));
+        Loger.INSTANCE.w("speed x/y:" + speed * x + "/" + speed * y);
         return this;
     }
 
@@ -49,7 +60,7 @@ public class SubBomb extends GameItemBitmapView {
                 return imageCacheBomb;
             default:
                 if (imageCache == null) {
-                    imageCache = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(), R.mipmap.game_bomb);
+                    imageCache = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(), R.mipmap.point);
                 }
                 return imageCache;
         }
@@ -65,9 +76,9 @@ public class SubBomb extends GameItemBitmapView {
     public void move() {
         super.move();
         if (waterBombState.getState() == State.Run) {
-            gamePoint.moveX(speed * (x / x + y));
-            gamePoint.moveY(speed * (y / x + y));
-            if (gamePoint.getY() <= 0.33) {
+            gamePoint.moveX(speed * x);
+            gamePoint.moveY(speed * y);
+            if (gamePoint.getY() <= 0) {
                 //炸天
                 bomb();
             }
@@ -100,7 +111,7 @@ public class SubBomb extends GameItemBitmapView {
 
 
     enum Speed {
-        L1(0.002f), L2(0.003f), L3(0.004f), L4(0.005f), L5(0.006f);
+        L1(0.002f), L2(0.003f), L3(0.004f), L4(0.005f), L5(0.008f);
 
         float speed;
 
@@ -120,10 +131,10 @@ public class SubBomb extends GameItemBitmapView {
         public WaterBombState(State state) {
             switch (state) {
                 case Run:
+                    setNextStateCallBack(1000, () -> new WaterBombState(State.Bomb));
                     break;
                 case Bomb:
-                    setTimes(10);
-                    setNextState(new WaterBombState(State.End));
+                    setNextStateCallBack(5, () -> new WaterBombState(State.End));
                     break;
                 case End:
                     break;

@@ -21,21 +21,25 @@ import org.gong.bmw.model.sea.enemy.EnemySupply;
 public class ScoreBoard {
     protected int maxW;
     protected int maxH;
+    private int heart = 5;
     private Rect imageOilDesRect;
     private Rect imageBoomDesRect;
     private Rect imageFoodDesRect;
     private int score = 0;
-    private int boom = 10;
-    private float oil = 10;
-    private int food = 10;
+    private int boom = 100;
+    private float oil = 100;
+    private int food = 100;
     private Paint textPaint;
-    private Bitmap imageOil, imageBomb, imageFood;
+    private Bitmap imageOil, imageBomb, imageFood, imageHeart;
 
     public ScoreBoard(int mCanvasWith, int mCanvasHigh) {
         textPaint = new Paint();
         textPaint.setAntiAlias(true);
         maxW = (int) (mCanvasWith * 0.2);
         maxH = (int) (mCanvasHigh * 0.3);
+
+        imageHeart = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(),
+                R.mipmap.heart_full);
 
         imageOil = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(),
                 R.mipmap.oil);
@@ -47,6 +51,14 @@ public class ScoreBoard {
                 R.mipmap.food);
 
 
+    }
+
+    public void loseHeart(int damage) {
+        heart -= damage;
+    }
+
+    public int getHeart() {
+        return heart;
     }
 
     public int getScore() {
@@ -109,6 +121,15 @@ public class ScoreBoard {
                 break;
             default:
                 break;
+        }
+        //heart
+        for (int hp = heart; hp > 0; hp--) {
+            Rect imageHeartRect = new Rect(
+                    canvas.getWidth() - (imageHeart.getWidth() + 8) * (hp + 1),
+                    32,
+                    canvas.getWidth() - (imageHeart.getWidth() + 8) * hp,
+                    imageHeart.getHeight() + 32);
+            canvas.drawBitmap(imageHeart, null, imageHeartRect, null);
         }
         //计分
         textPaint.setTextSize(32);

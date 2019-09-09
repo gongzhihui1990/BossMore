@@ -54,16 +54,17 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
      * 每30帧刷新一次屏幕
      **/
     public static final int TIME_IN_FRAME = 30;
+    private static int mCanvasWith;
+    private static int mCanvasHigh;
     /**
      * 游戏画板
      */
     private Canvas mCanvas;
-    private int mCanvasWith;
-    private int mCanvasHigh;
     private SurfaceHolder mSurfaceHolder;
     private GameController mGameController;
     private boolean mIsRunning = false;
     private List<GameItemView> gameItems = new ArrayList<>();
+    private List<GameItemView> newGameItems = new ArrayList<>();
     /**
      * 海洋画笔
      */
@@ -84,7 +85,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
     private Moon moon;
     private ScoreBoard scoreBoard;
     private GameTimer gameTimer = GameTimer.Companion.getInstance();
-    private int maxEnemySize = 5;
+    private int maxEnemySize = 10;
 
     public SeaFightGameView(Context context, @NonNull GameController controller) {
         super(context);
@@ -104,6 +105,14 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         pSun = new Paint();
         pSun.setAntiAlias(true);
         pSun.setColor(Color.RED);
+    }
+
+    public static int getHigh() {
+        return mCanvasHigh;
+    }
+
+    public static int getWith() {
+        return mCanvasWith;
     }
 
     @Override
@@ -269,12 +278,8 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                 if (view instanceof GameItemBitmapView) {
                     GameItemBitmapView bitmapView = (GameItemBitmapView) view;
                     Bitmap bootBit = bitmapView.getBitmap();
-                    int highBuff = 0;
-                    if (view instanceof MainBoot) {
-                        highBuff = (int) (bootBit.getHeight() * 0.8);
-                    }
                     int viewLeft = (int) (mCanvasWith * view.getPosition().getX());
-                    int viewTop = (int) (mCanvasHigh * view.getPosition().getY()) - highBuff;
+                    int viewTop = (int) (mCanvasHigh * view.getPosition().getY());
                     int viewBitWidth = bootBit.getWidth();
                     int viewBitHeight = bootBit.getHeight();
                     Rect bootSrcRect = new Rect(0, 0, viewBitWidth, viewBitHeight);
@@ -282,6 +287,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                     if (bitmapView instanceof WaterBomb) {
                         WaterBomb waterBomb = (WaterBomb) bitmapView;
                         float rotation = waterBomb.rotation();
+                        //带旋转效果
                         drawRotateBitmap(mCanvas, bootBit, rotation, viewLeft, viewTop);
                     } else {
                         mCanvas.drawBitmap(bootBit, bootSrcRect, bootDesRect, null);
@@ -352,32 +358,25 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                 }
                 //碰撞处理
                 List<EnemyBaseBoot> enemyBoots = new ArrayList<>();
-                List<WaterBomb> bombs = new ArrayList<>();
+                List<WaterBomb> waterBombs = new ArrayList<>();
                 List<SubBomb> subBombs = new ArrayList<>();
                 MainBoot mainBoot = null;
                 for (GameItemView itemView : gameItems) {
-                    if (itemView instanceof MainBoot) {
-                        mainBoot = (MainBoot) itemView;
-                        if (BaseBoot.Direct.Stay != ((MainBoot) itemView).getDirect()) {
-                            if (!scoreBoard.useOil()) {
-                                onGameOver();
-                            }
-                        }
-                        continue;
-                    }
                     if (itemView instanceof EnemyBaseBoot) {
                         EnemyBaseBoot enemy = (EnemyBaseBoot) itemView;
                         if (EnemyBaseBoot.State.readyAttack == enemy.getGameItemState().getState()) {
-                            Loger.INSTANCE.i("attacking!");
-                            MainBoot finalMainBoot = mainBoot;
-                            enemy.setAttackCallBack(() -> {
-                                if (finalMainBoot != null) {
-                                    SubBomb subBomb = new SubBomb();
-                                    subBomb.releaseAt(enemy.getPosition(), finalMainBoot.getPosition());
-                                    subBombs.add(subBomb);
-                                }
-                                enemy.setAttackCallBack(null);
-                            });
+                            if (enemy instanceof U26) {
+                                Loger.INSTANCE.i("set attacking call!");
+                                MainBoot finalMainBoot = mainBoot;
+                                enemy.setAttackCallBack(() -> {
+                                    if (finalMainBoot != null) {
+                                        SubBomb subBomb = new SubBomb();
+                                        subBomb.releaseAt(enemy, finalMainBoot);
+                                        newGameItems.add(subBomb);
+                                    }
+                                    enemy.setAttackCallBack(null);
+                                });
+                            }
                         }
                         if (EnemyBaseBoot.State.attacking == enemy.getGameItemState().getState()) {
                             Loger.INSTANCE.i("attacking!");
@@ -388,21 +387,54 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         continue;
                     }
                     if (itemView instanceof WaterBomb) {
-                        bombs.add((WaterBomb) itemView);
+                        waterBombs.add((WaterBomb) itemView);
+                        continue;
+                    }
+                    if (itemView instanceof SubBomb) {
+                        subBombs.add((SubBomb) itemView);
+                        continue;
+                    }
+                    if (itemView instanceof MainBoot) {
+                        mainBoot = (MainBoot) itemView;
+                        if (BaseBoot.Direct.Stay != ((MainBoot) itemView).getDirect()) {
+                            if (!scoreBoard.useOil()) {
+                                onGameOver();
+                            }
+                        }
                         continue;
                     }
                     Loger.INSTANCE.i(itemView.getClass().getName());
                 }
-                if (!subBombs.isEmpty()) {
-                    //添加射向我的水雷
-                    gameItems.addAll(subBombs);
+
+                if (mainBoot != null) {
+                    for (SubBomb subBomb : subBombs) {
+                        //是否攻击到船体
+                        if (SubBomb.State.Run == subBomb.getGameItemState().getState()
+                                && crashedMainBoot(mainBoot, subBomb)) {
+                            int damage = subBomb.bomb();
+                            scoreBoard.loseHeart(damage);
+                            break;
+//                                if (EnemyBaseBoot.State.broken != mainBoot.getGameItemState().getState()) {
+//                                    boolean destroy = mainBoot.onDamage(damage);
+//                                    if (destroy) {
+//                                        scoreBoard.addToScore(enemyBoot);
+//                                    }
+//                                }
+                        }
+                    }
+
                 }
-                if (bombs.isEmpty() && !scoreBoard.hasBoom()) {
+                if (!newGameItems.isEmpty()) {
+                    //添加射向我的水雷
+                    gameItems.addAll(newGameItems);
+                    newGameItems.clear();
+                }
+                if (waterBombs.isEmpty() && !scoreBoard.hasBoom()) {
                     onGameOver();
                 }
                 for (EnemyBaseBoot enemyBoot : enemyBoots) {
-                    for (WaterBomb bomb : bombs) {
-                        //发生碰撞爆炸
+                    for (WaterBomb bomb : waterBombs) {
+                        //攻击到敌舰，发生碰撞爆炸
                         if (WaterBomb.State.Run == bomb.getGameItemState().getState()
                                 && crashed(enemyBoot, bomb)) {
                             int damage = bomb.bomb();
@@ -423,6 +455,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         it.remove();
                     }
                 }
+                Loger.INSTANCE.w("gameItems size:" + gameItems.size());
                 break;
             case Pause:
                 //TODO
@@ -431,7 +464,6 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                 break;
         }
     }
-
 
     private void onGameOver() {
         mGameController.gameOver(scoreBoard);
@@ -454,8 +486,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         return true;
     }
 
-
-    private boolean crashed(EnemyBaseBoot enemyBoot, WaterBomb bomb) {
+    private boolean crashed(EnemyBaseBoot boot, WaterBomb bomb) {
 //        2. 矩形的碰撞检测方法1
 //        碰撞条件：
 //        x抽距离差 < 两矩形宽度之和 / 2
@@ -463,20 +494,53 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         final int with = mCanvasWith;
         final int height = mCanvasHigh;
 
-        GamePoint p1 = enemyBoot.getPosition();
+        GamePoint p1 = boot.getPosition();
         GamePoint p2 = bomb.getPosition();
 
-        int w12 = enemyBoot.getBitmap().getWidth() + bomb.getBitmap().getWidth();
-        float dxf = (p1.getX() * with + enemyBoot.getBitmap().getWidth() / 2) - (p2.getX() * with + bomb.getBitmap().getWidth() / 2);
-        float dx = Math.abs(dxf);
-        if (dx > w12 / 2) {
+        float bootR = (float) Math.sqrt(Math.pow(boot.getBitmap().getWidth() / 2, 2) + Math.pow(boot.getBitmap().getHeight() / 2, 2));
+        //p1中心坐标
+        float p1x = p1.getX() * with + boot.getBitmap().getWidth() / 2;
+        float p1y = p1.getY() * height + boot.getBitmap().getHeight() / 2;
+        //p2中心坐标
+        float p2x = p2.getX() * with + bomb.getBitmap().getWidth() / 2;
+        float p2y = p2.getY() * height + bomb.getBitmap().getHeight() / 2;
+        //两中心距离
+        float dx = p1x - p2x;
+        float dy = p1y - p2y;
+
+        float distance = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+        if (distance > bootR / 2) {
             return false;
         }
+        return true;
+    }
 
-        int h12 = enemyBoot.getBitmap().getHeight() + bomb.getBitmap().getHeight();
-        float dyf = (p1.getY() * with + enemyBoot.getBitmap().getHeight() / 2) - (p2.getY() * with + bomb.getBitmap().getHeight() / 2);
-        float dy = Math.abs(dyf);
-        if (dy > h12 / 2) {
+    private boolean crashedMainBoot(GameItemBitmapView boot, GameItemBitmapView bomb) {
+//        2. 矩形的碰撞检测方法1
+//        碰撞条件：
+//        x抽距离差 < 两矩形宽度之和 / 2
+//        y抽距离差 < 两矩形高度之和 / 2
+        final int with = mCanvasWith;
+        final int height = mCanvasHigh;
+
+        GamePoint p1 = boot.getPosition();
+        GamePoint p2 = bomb.getPosition();
+
+        float bootR = (float) Math.sqrt(Math.pow(boot.getBitmap().getWidth() / 2, 2) + Math.pow(boot.getBitmap().getHeight() / 2, 2));
+        //p1中心坐标
+        float p1x = p1.getX() * with + boot.getBitmap().getWidth() / 2;
+        float p1y = p1.getY() * height + boot.getBitmap().getHeight() / 2;
+        //p2中心坐标
+        float p2x = p2.getX() * with + bomb.getBitmap().getWidth() / 2;
+        float p2y = p2.getY() * height + bomb.getBitmap().getHeight() / 2;
+        //两中心距离
+        float dx = p1x - p2x;
+        float dy = p1y - p2y;
+
+        float distance = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+
+        if (distance > bootR / 2) {
             return false;
         }
         return true;

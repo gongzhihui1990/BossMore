@@ -120,8 +120,7 @@ public class WaterBomb extends GameItemBitmapView {
                 case Run:
                     break;
                 case Bomb:
-                    setTimes(10);
-                    setNextState(new WaterBombState(State.End));
+                    setNextStateCallBack(10,() -> new WaterBombState(State.End));
                     break;
                 case End:
                     break;
