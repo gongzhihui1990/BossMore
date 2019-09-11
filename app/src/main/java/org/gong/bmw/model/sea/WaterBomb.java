@@ -8,6 +8,7 @@ import org.gong.bmw.R;
 import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GameItemState;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.Speed;
 
 /**
  * @author caroline
@@ -25,7 +26,7 @@ public class WaterBomb extends GameItemBitmapView {
     /**
      * 速度屏幕宽度千分比
      */
-    private float speed = WaterBomb.Speed.L3.speed;
+    private float speed = Speed.L3.speed;
     private WaterBombState waterBombState = new WaterBombState(State.Run);
 
     public WaterBomb releaseAt(GamePoint point) {
@@ -97,15 +98,6 @@ public class WaterBomb extends GameItemBitmapView {
     }
 
 
-    enum Speed {
-        L1(0.002f), L2(0.003f), L3(0.004f), L4(0.005f), L5(0.006f);
-
-        float speed;
-
-        Speed(float s) {
-            speed = s;
-        }
-    }
 
 
     public enum State {

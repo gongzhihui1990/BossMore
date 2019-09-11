@@ -9,6 +9,7 @@ import net.gtr.framework.util.ToastUtil
 import org.gong.bmw.R
 import org.gong.bmw.control.BootController
 import org.gong.bmw.control.GameController
+import org.gong.bmw.game.GameResource
 import org.gong.bmw.game.SeaFightGameView
 import org.gong.bmw.model.GameState
 import org.gong.bmw.model.sea.ScoreBoard
@@ -26,7 +27,14 @@ class PlayActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        rootView.addView(SeaFightGameView(this, MainGameController()))
+
+        RxHelper.bindOnUI(Observable.just(true).map { GameResource.init(getContext()) }, object : ProgressObserverImplementation<Boolean>() {
+            override fun onNext(t: Boolean) {
+                super.onNext(t)
+                rootView.addView(SeaFightGameView(this@PlayActivity, MainGameController()))
+            }
+        }.setMessage("loading"))
+
     }
 
     inner class MainGameController : GameController {

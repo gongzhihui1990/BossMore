@@ -1,6 +1,6 @@
 package org.gong.bmw.model.sea.enemy;
 
-import org.gong.bmw.model.sea.BaseBoot;
+import org.gong.bmw.model.Speed;
 
 /**
  * @author: create by 龚志辉
@@ -10,14 +10,14 @@ import org.gong.bmw.model.sea.BaseBoot;
  */
 public class EnemyAbility {
     private int HP;
-    private BaseBoot.Speed speed;
+    private Speed speed;
 
     public int getHP() {
         return HP;
     }
 
 
-    public BaseBoot.Speed getSpeed() {
+    public Speed getSpeed() {
         return speed;
     }
 
@@ -30,7 +30,7 @@ public class EnemyAbility {
             return supplyBuilder;
         }
 
-        public Builder setSpeed(BaseBoot.Speed speed) {
+        public Builder setSpeed(Speed speed) {
             this.ability.speed = speed;
             return this;
         }

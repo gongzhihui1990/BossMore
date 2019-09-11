@@ -5,6 +5,7 @@ import android.content.Context;
 import org.gong.bmw.control.BootController;
 import org.gong.bmw.model.GameItemState;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.Speed;
 import org.gong.bmw.model.sea.BaseBoot;
 
 /**

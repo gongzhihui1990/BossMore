@@ -17,14 +17,14 @@ public enum EnemyEnum {
     /**
      *
      */
-    Dolphin(0.03f, 0, 0),
-    U21(0.01f, 0, 100),
-    U26(0.1f, 0, 0),
+    Dolphin(1f, 0, 100),
+    U21(1f, 0, 100),
+    U26(1f, 0, 100),
 
-    U50(0.05f, 50, 0),
-    Shark(0.01f, 50, 0),
 
-    U21_PLUS(0.02f, 100, 0);
+    U50(1f, 50, 0),
+    Shark(1f, 50, 0),
+    U21_PLUS(1f, 100, 0);
 
     private final int minScore;
     private final int maxScore;

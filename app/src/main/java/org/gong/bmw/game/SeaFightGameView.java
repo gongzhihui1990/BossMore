@@ -51,9 +51,9 @@ import java.util.List;
 @SuppressLint("ViewConstructor")
 public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     /**
-     * 每30帧刷新一次屏幕
+     * 每20毫秒刷新一帧屏幕
      **/
-    public static final int TIME_IN_FRAME = 30;
+    public static final int TIME_IN_FRAME = 20;
     private static int mCanvasWith;
     private static int mCanvasHigh;
     /**
@@ -84,7 +84,6 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
     private Sun sun;
     private Moon moon;
     private ScoreBoard scoreBoard;
-    private GameTimer gameTimer = GameTimer.Companion.getInstance();
     private int maxEnemySize = 10;
 
     public SeaFightGameView(Context context, @NonNull GameController controller) {
@@ -189,6 +188,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         while (mIsRunning) {
             /**取得更新之前的时间**/
             long startTime = System.currentTimeMillis();
+
             /**在这里加上线程安全锁**/
             synchronized (mSurfaceHolder) {
                 doGameDraw();
@@ -201,7 +201,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
             /**计算出一次更新的毫秒数**/
             int diffTime = (int) (endTime - startTime);
 
-            /**确保每次更新时间为30帧**/
+            /**确保每次更新时间为50帧**/
             while (diffTime <= TIME_IN_FRAME) {
                 diffTime = (int) (System.currentTimeMillis() - startTime);
                 /**线程等待**/
@@ -331,20 +331,24 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         currentEnemySize++;
                     }
                 }
-                //新增敌人----
-                if (currentEnemySize < maxEnemySize) {
-                    double randomSeed = Math.random();
-                    List<EnemyEnum> list = Arrays.asList(EnemyEnum.values());
-                    //打乱列表
-                    Collections.shuffle(list);
-                    for (EnemyEnum enemy : list) {
-                        //判断是否可以新增
-                        if (enemy.canCreate(randomSeed, scoreBoard)) {
-                            gameItems.add(enemy.create(getContext()));
-                            break;
+                //新增敌人---- 平均3000毫秒新增一个,当前50HZ=20毫秒
+                //新增概率1/150
+                if (System.currentTimeMillis() % 100 == 0) {
+                    if (currentEnemySize < maxEnemySize) {
+                        double randomSeed = Math.random();
+                        List<EnemyEnum> list = Arrays.asList(EnemyEnum.values());
+                        //打乱列表
+                        Collections.shuffle(list);
+                        for (EnemyEnum enemy : list) {
+                            //判断是否可以新增
+                            if (enemy.canCreate(randomSeed, scoreBoard)) {
+                                gameItems.add(enemy.create(getContext()));
+                                break;
+                            }
                         }
                     }
                 }
+
                 //新增敌人----
                 //元素移动
                 for (GameItemView itemView : gameItems) {

@@ -2,9 +2,10 @@ package org.gong.bmw.model.sea.enemy;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
-import org.gong.bmw.R;
+import org.gong.bmw.model.Speed;
+
+import static org.gong.bmw.game.GameResource.SUB_26;
 
 /**
  * @author caroline
@@ -13,7 +14,6 @@ import org.gong.bmw.R;
 
 public class U26 extends EnemyBaseBoot {
 
-    private static Bitmap imageCache = null;
 
     public U26(Context context) {
         super(context);
@@ -37,10 +37,7 @@ public class U26 extends EnemyBaseBoot {
 
     @Override
     public Bitmap getBitmap() {
-        if (imageCache == null) {
-            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_sub_u26);
-        }
-        return imageCache;
+        return SUB_26;
     }
 
 

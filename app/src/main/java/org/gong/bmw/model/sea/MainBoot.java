@@ -2,12 +2,14 @@ package org.gong.bmw.model.sea;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
-import org.gong.bmw.R;
+import net.gtr.framework.util.Loger;
+
 import org.gong.bmw.control.BootController;
+import org.gong.bmw.game.GameResource;
 import org.gong.bmw.model.GameItemState;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.Speed;
 
 /**
  * @author caroline
@@ -16,7 +18,6 @@ import org.gong.bmw.model.GamePoint;
 
 public final class MainBoot extends BaseBoot {
 
-    private transient Bitmap imageCache = null;
     private MainBootState bootState = new MainBootState(State.normal);
 
 
@@ -55,6 +56,7 @@ public final class MainBoot extends BaseBoot {
 
     @Override
     public void joyStick(int angle, int strength) {
+        Loger.INSTANCE.d("strength:" + strength);
         if ((angle > 0 && angle < 90) || angle > 270) {
             joyButton(Code.Right);
         } else if (angle > 90 && angle < 270) {
@@ -66,10 +68,7 @@ public final class MainBoot extends BaseBoot {
 
     @Override
     public Bitmap getBitmap() {
-        if (imageCache == null) {
-            imageCache = BitmapFactory.decodeResource(context.getResources(), R.mipmap.game_boot);
-        }
-        return imageCache;
+        return GameResource.GameBoot;
     }
 
     @Override

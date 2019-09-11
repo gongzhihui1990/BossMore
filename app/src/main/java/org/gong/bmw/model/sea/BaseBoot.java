@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import org.gong.bmw.control.BootController;
 import org.gong.bmw.model.GameItemBitmapView;
 import org.gong.bmw.model.GamePoint;
+import org.gong.bmw.model.Speed;
 
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     protected Context context;
 
     /**
-     * 速度屏幕宽度千分比
+     * 速度为屏幕宽度千分比
      */
     private float speed = Speed.L1.speed;
     /**
@@ -178,15 +179,7 @@ public abstract class BaseBoot extends GameItemBitmapView implements GameBoot {
     }
 
 
-    public enum Speed {
-        L1(0.001f), L2(0.0012f), L3(0.002f), L4(0.0028f), L5(0.0032f), L6(0.0060f);
 
-        float speed;
-
-        Speed(float s) {
-            speed = s;
-        }
-    }
 
 
     public enum Boundary {
