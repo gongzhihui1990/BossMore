@@ -26,7 +26,7 @@ public class WaterBomb extends GameItemBitmapView {
     /**
      * 速度屏幕宽度千分比
      */
-    private float speed = Speed.L3.speed;
+    private float speed = Speed.L5.speed;
     private WaterBombState waterBombState = new WaterBombState(State.Run);
 
     public WaterBomb releaseAt(GamePoint point) {
