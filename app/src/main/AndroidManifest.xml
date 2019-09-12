@@ -19,18 +19,21 @@
             android:name=".view.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullWindowTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".view.MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.WelcomeActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name=".view.PlayActivity"
             android:screenOrientation="landscape" />

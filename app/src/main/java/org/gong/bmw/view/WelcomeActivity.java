@@ -26,6 +26,11 @@ public class WelcomeActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         btnStart = findViewById(R.id.btnStart);
-        btnStart.setOnClickListener(v -> startActivity(new Intent(getContext(), PlayActivity.class)));
+        btnStart.setOnClickListener(v ->
+                {
+                    startActivity(new Intent(getContext(), PlayActivity.class));
+                    finish();
+                }
+        );
     }
 }

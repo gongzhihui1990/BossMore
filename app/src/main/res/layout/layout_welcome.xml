@@ -2,25 +2,26 @@
 
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@mipmap/welcome"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@mipmap/welcome">
 
 
     <TextView
         android:id="@+id/btnStart"
-        android:padding="12dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:text="start play"
-        android:textColor="#ffffff"
-        android:textSize="28sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@mipmap/play"
+        android:gravity="center"
+        android:text="play"
+        android:textColor="#ffffff"
+        android:textSize="24sp"
+        android:paddingRight="8dp"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

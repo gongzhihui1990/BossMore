@@ -29,7 +29,7 @@ import org.gong.bmw.model.sea.GameTimer;
 import org.gong.bmw.model.sea.MainBoot;
 import org.gong.bmw.model.sea.Moon;
 import org.gong.bmw.model.sea.ScoreBoard;
-import org.gong.bmw.model.sea.SubBomb;
+import org.gong.bmw.model.sea.SubBullet;
 import org.gong.bmw.model.sea.Sun;
 import org.gong.bmw.model.sea.WaterBomb;
 import org.gong.bmw.model.sea.enemy.EnemyBaseBoot;
@@ -131,7 +131,11 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                                     if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
                                         if (scoreBoard.useBoom()) {
                                             WaterBomb bomb = new WaterBomb();
-                                            bomb.releaseAt(mainBoot.getPosition());
+                                            GamePoint mp = mainBoot.getPosition();
+                                            float rx = mp.getX() + (float) mainBoot.getBitmap().getWidth() / (mCanvasWith * 2);
+                                            float ry = mp.getY() + (float) mainBoot.getBitmap().getHeight() / (mCanvasHigh * 2);
+                                            GamePoint releasePoint = new GamePoint(rx, ry);
+                                            bomb.releaseAt(releasePoint);
                                             mainBoot.joyButton(BootController.Code.ReleaseBomb);
                                             gameItems.add(bomb);
                                         } else {
@@ -363,7 +367,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                 //碰撞处理
                 List<EnemyBaseBoot> enemyBoots = new ArrayList<>();
                 List<WaterBomb> waterBombs = new ArrayList<>();
-                List<SubBomb> subBombs = new ArrayList<>();
+                List<SubBullet> subBombs = new ArrayList<>();
                 MainBoot mainBoot = null;
                 for (GameItemView itemView : gameItems) {
                     if (itemView instanceof EnemyBaseBoot) {
@@ -374,7 +378,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                                 MainBoot finalMainBoot = mainBoot;
                                 enemy.setAttackCallBack(() -> {
                                     if (finalMainBoot != null) {
-                                        SubBomb subBomb = new SubBomb();
+                                        SubBullet subBomb = new SubBullet();
                                         subBomb.releaseAt(enemy, finalMainBoot);
                                         newGameItems.add(subBomb);
                                     }
@@ -394,8 +398,8 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         waterBombs.add((WaterBomb) itemView);
                         continue;
                     }
-                    if (itemView instanceof SubBomb) {
-                        subBombs.add((SubBomb) itemView);
+                    if (itemView instanceof SubBullet) {
+                        subBombs.add((SubBullet) itemView);
                         continue;
                     }
                     if (itemView instanceof MainBoot) {
@@ -411,19 +415,16 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                 }
 
                 if (mainBoot != null) {
-                    for (SubBomb subBomb : subBombs) {
+                    for (SubBullet bullet : subBombs) {
                         //是否攻击到船体
-                        if (SubBomb.State.Run == subBomb.getGameItemState().getState()
-                                && crashedMainBoot(mainBoot, subBomb)) {
-                            int damage = subBomb.bomb();
+                        if (SubBullet.State.Run == bullet.getGameItemState().getState()
+                                && crashedMain(mainBoot, bullet)) {
+                            int damage = bullet.bomb();
                             scoreBoard.loseHeart(damage);
+                            if (scoreBoard.getHeart() == 0) {
+                                onGameOver();
+                            }
                             break;
-//                                if (EnemyBaseBoot.State.broken != mainBoot.getGameItemState().getState()) {
-//                                    boolean destroy = mainBoot.onDamage(damage);
-//                                    if (destroy) {
-//                                        scoreBoard.addToScore(enemyBoot);
-//                                    }
-//                                }
                         }
                     }
 
@@ -501,26 +502,23 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         GamePoint p1 = boot.getPosition();
         GamePoint p2 = bomb.getPosition();
 
-        float bootR = (float) Math.sqrt(Math.pow(boot.getBitmap().getWidth() / 2, 2) + Math.pow(boot.getBitmap().getHeight() / 2, 2));
-        //p1中心坐标
-        float p1x = p1.getX() * with + boot.getBitmap().getWidth() / 2;
-        float p1y = p1.getY() * height + boot.getBitmap().getHeight() / 2;
-        //p2中心坐标
-        float p2x = p2.getX() * with + bomb.getBitmap().getWidth() / 2;
-        float p2y = p2.getY() * height + bomb.getBitmap().getHeight() / 2;
-        //两中心距离
-        float dx = p1x - p2x;
-        float dy = p1y - p2y;
+        int w12 = boot.getBitmap().getWidth() + bomb.getBitmap().getWidth();
+        float dxf = (p1.getX() * with + (float) boot.getBitmap().getWidth() / 2) - (p2.getX() * with + (float) bomb.getBitmap().getWidth() / 2);
+        float dx = Math.abs(dxf);
+        if (dx > w12 / 2) {
+            return false;
+        }
 
-        float distance = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-
-        if (distance > bootR / 2) {
+        int h12 = boot.getBitmap().getHeight() + bomb.getBitmap().getHeight();
+        float dyf = (p1.getY() * height + (float) boot.getBitmap().getHeight() / 2) - (p2.getY() * height + (float) bomb.getBitmap().getHeight() / 2);
+        float dy = Math.abs(dyf);
+        if (dy > h12 / 2) {
             return false;
         }
         return true;
     }
 
-    private boolean crashedMainBoot(GameItemBitmapView boot, GameItemBitmapView bomb) {
+    private boolean crashedMain(GameItemBitmapView boot, GameItemBitmapView bomb) {
 //        2. 矩形的碰撞检测方法1
 //        碰撞条件：
 //        x抽距离差 < 两矩形宽度之和 / 2
@@ -531,13 +529,13 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
         GamePoint p1 = boot.getPosition();
         GamePoint p2 = bomb.getPosition();
 
-        float bootR = (float) Math.sqrt(Math.pow(boot.getBitmap().getWidth() / 2, 2) + Math.pow(boot.getBitmap().getHeight() / 2, 2));
+        float bootR = (float) Math.sqrt(Math.pow((float) boot.getBitmap().getWidth() / 2, 2) + Math.pow(boot.getBitmap().getHeight() / 2, 2));
         //p1中心坐标
-        float p1x = p1.getX() * with + boot.getBitmap().getWidth() / 2;
-        float p1y = p1.getY() * height + boot.getBitmap().getHeight() / 2;
+        float p1x = p1.getX() * with + (float) boot.getBitmap().getWidth() / 2;
+        float p1y = p1.getY() * height + (float) boot.getBitmap().getHeight() / 2;
         //p2中心坐标
-        float p2x = p2.getX() * with + bomb.getBitmap().getWidth() / 2;
-        float p2y = p2.getY() * height + bomb.getBitmap().getHeight() / 2;
+        float p2x = p2.getX() * with + (float) bomb.getBitmap().getWidth() / 2;
+        float p2y = p2.getY() * height + (float) bomb.getBitmap().getHeight() / 2;
         //两中心距离
         float dx = p1x - p2x;
         float dy = p1y - p2y;

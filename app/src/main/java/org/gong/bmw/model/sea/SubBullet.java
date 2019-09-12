@@ -2,8 +2,6 @@ package org.gong.bmw.model.sea;
 
 import android.graphics.Bitmap;
 
-import net.gtr.framework.util.Loger;
-
 import org.gong.bmw.game.GameResource;
 import org.gong.bmw.game.SeaFightGameView;
 import org.gong.bmw.model.GameItemBitmapView;
@@ -18,8 +16,8 @@ import org.gong.bmw.model.sea.enemy.EnemyBaseBoot;
  * 潜艇对船只发射的导弹
  */
 
-public class SubBomb extends GameItemBitmapView {
-    float x, y;
+public class SubBullet extends GameItemBitmapView {
+    private float xSpeed, ySpeed;
     /**
      * 位置 0-1
      */
@@ -30,19 +28,28 @@ public class SubBomb extends GameItemBitmapView {
     private float speed = Speed.L3.speed;
     private WaterBombState waterBombState = new WaterBombState(State.Run);
 
-    public SubBomb releaseAt(EnemyBaseBoot sender, MainBoot target) {
-        GamePoint sendPoint = sender.getPosition();
+    /**
+     * 释放位置
+     *
+     * @param sender
+     * @param target
+     * @return
+     */
+    public SubBullet releaseAt(EnemyBaseBoot sender, MainBoot target) {
+        GamePoint sendPoint = new GamePoint(
+                sender.getPosition().getX() + ((float) sender.getBitmap().getWidth()) / (SeaFightGameView.getWith() * 2),
+                sender.getPosition().getY() + ((float) sender.getBitmap().getHeight()) / (SeaFightGameView.getHigh() * 2));
+
         GamePoint targetPoint = new GamePoint(
                 target.getPosition().getX() + ((float) target.getBitmap().getWidth()) / (SeaFightGameView.getWith() * 2),
                 target.getPosition().getY() + ((float) target.getBitmap().getHeight()) / (SeaFightGameView.getHigh() * 2));
-        Loger.INSTANCE.w("sendPoint:" + sendPoint.getX() + "/" + sendPoint.getY());
-        Loger.INSTANCE.w("targetPoint:" + targetPoint.getX() + "/" + targetPoint.getY());
+
         this.gamePoint = new GamePoint(sendPoint);
+
         float tx = targetPoint.getX() - sendPoint.getX();
         float ty = targetPoint.getY() - sendPoint.getY();
-        x = (float) (tx / Math.sqrt(tx * tx + ty * ty));
-        y = (float) (ty / Math.sqrt(tx * tx + ty * ty));
-        Loger.INSTANCE.w("speed x/y:" + speed * x + "/" + speed * y);
+        xSpeed = (float) (tx / Math.sqrt(tx * tx + ty * ty));
+        ySpeed = (float) (ty / Math.sqrt(tx * tx + ty * ty));
         return this;
     }
 
@@ -66,8 +73,8 @@ public class SubBomb extends GameItemBitmapView {
     public void move() {
         super.move();
         if (waterBombState.getState() == State.Run) {
-            gamePoint.moveX(speed * x);
-            gamePoint.moveY(speed * y);
+            gamePoint.moveX(speed * xSpeed);
+            gamePoint.moveY(speed * ySpeed);
             if (gamePoint.getY() <= 0) {
                 //炸天
                 bomb();
@@ -100,9 +107,10 @@ public class SubBomb extends GameItemBitmapView {
     }
 
 
-
-
     public enum State {
+        /**
+         * 子弹的状态
+         */
         Run, Bomb, End
     }
 

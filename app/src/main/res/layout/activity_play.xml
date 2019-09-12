@@ -18,12 +18,12 @@
         app:layout_constraintTop_toTopOf="parent" />
     <!--(btnLeft: Button,btnRight : Button,btnSwitch: Button)-->
 
-    <Button
+    <ImageView
         android:id="@+id/btnRelease"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/dimen_12"
-        android:background="@mipmap/ic_boom_launch"
+        android:layout_margin="20dp"
+        android:background="@mipmap/bomb_release"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -54,6 +54,7 @@
         android:alpha="0.3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="20dp"
         custom:JV_backgroundColor="#FFFFFF"
         custom:JV_borderColor="#000000"
         custom:JV_borderWidth="4dp"
