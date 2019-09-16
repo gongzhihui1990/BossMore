@@ -22,9 +22,6 @@
 
         </activity>
         <activity
-            android:name=".view.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".view.WelcomeActivity"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -37,7 +34,5 @@
         <activity
             android:name=".view.PlayActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".view.BLEActivity" />
-        <activity android:name=".view.BLSActivity" />
     </application>
 </manifest>

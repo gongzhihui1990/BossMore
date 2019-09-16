@@ -63,6 +63,7 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
     private SurfaceHolder mSurfaceHolder;
     private GameController mGameController;
     private boolean mIsRunning = false;
+    private boolean mIsPlaying = true;
     private List<GameItemView> gameItems = new ArrayList<>();
     private List<GameItemView> newGameItems = new ArrayList<>();
     /**
@@ -127,6 +128,9 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
                         // 防止list遍历时对list操作
                         synchronized (mSurfaceHolder) {
                             switch (code) {
+                                case GameMenu:
+                                    mIsPlaying = !mIsPlaying;
+                                    break;
                                 case ReleaseBomb:
                                     if (mainBoot.getGameItemState().getState() == MainBoot.State.normal) {
                                         if (scoreBoard.useBoom()) {
@@ -190,6 +194,9 @@ public class SeaFightGameView extends SurfaceView implements SurfaceHolder.Callb
     @Override
     public void run() {
         while (mIsRunning) {
+            if (!mIsPlaying) {
+                continue;
+            }
             /**取得更新之前的时间**/
             long startTime = System.currentTimeMillis();
 

@@ -21,25 +21,35 @@ import org.gong.bmw.model.sea.ScoreBoard
  */
 
 class PlayActivity : BaseActivity() {
-
+    var mainGameController: MainGameController? = null
     override val layoutR: Int
         get() = R.layout.activity_play
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        mainGameController = MainGameController()
         RxHelper.bindOnUI(Observable.just(true).map { GameResource.init(getContext()) }, object : ProgressObserverImplementation<Boolean>() {
             override fun onNext(t: Boolean) {
                 super.onNext(t)
-                rootView.addView(SeaFightGameView(this@PlayActivity, MainGameController()))
+                rootView.addView(SeaFightGameView(this@PlayActivity, mainGameController!!))
             }
         }.setMessage("loading"))
 
     }
 
+
+    override fun onBackPressed() {
+        this.mainGameController?.onBackPressed()
+    }
+
     inner class MainGameController : GameController {
+        lateinit var bootController: BootController
+        fun onBackPressed() {
+            bootController.joyButton(BootController.Code.GameMenu)
+        }
 
         override fun onPlayerControllerPrepared(bootController: BootController) {
+            this.bootController = bootController
             this@PlayActivity.btnSwitch.setOnClickListener {
                 start = !start
                 if (start) {
@@ -74,7 +84,7 @@ class PlayActivity : BaseActivity() {
                             super.onNext(t)
                             ToastUtil.show(t)
                         }
-                    });
+                    })
         }
 
         override fun getGameState(): GameState {

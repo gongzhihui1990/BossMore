@@ -18,15 +18,21 @@ import org.gong.bmw.model.sea.enemy.EnemySupply;
  * @description: org.gong.bmw.model.sea
  * @date:2019-09-04 记分板
  */
-public class ScoreBoard {
+public class ScoreBoardV2 {
     protected int maxW;
     protected int maxH;
     private int heart = 5;
+    private Rect imageOilDesRect;
+    private Rect imageBoomDesRect;
+    private Rect imageFoodDesRect;
     private int score = 0;
+    private int boom = 100;
+    private float oil = 100;
+    private int food = 100;
     private Paint textPaint;
-    private Bitmap  imageHeart;
+    private Bitmap imageOil, imageBomb, imageFood, imageHeart;
 
-    public ScoreBoard(int mCanvasWith, int mCanvasHigh) {
+    public ScoreBoardV2(int mCanvasWith, int mCanvasHigh) {
         textPaint = new Paint();
         textPaint.setAntiAlias(true);
         maxW = (int) (mCanvasWith * 0.2);
@@ -34,6 +40,15 @@ public class ScoreBoard {
 
         imageHeart = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(),
                 R.mipmap.heart_full);
+
+        imageOil = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(),
+                R.mipmap.oil);
+
+        imageBomb = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(),
+                R.mipmap.bomb);
+
+        imageFood = BitmapFactory.decodeResource(App.Companion.getInstance().getResources(),
+                R.mipmap.food);
 
 
     }
@@ -54,24 +69,39 @@ public class ScoreBoard {
     public void addToScore(EnemyBaseBoot enemyBoot) {
         EnemySupply supply = enemyBoot.getSupply();
         score += supply.getScore();
+        boom += supply.getBoom();
+        food += supply.getFood();
+        oil += supply.getOil();
     }
 
 
     public boolean useFood() {
+        if (food <= 0) {
+            return false;
+        }
+        food--;
         return true;
     }
 
 
     public boolean hasBoom() {
-        return true;
+        return boom > 0;
     }
 
     public boolean useBoom() {
+        if (boom <= 0) {
+            return false;
+        }
+        boom--;
         return true;
     }
 
 
     public boolean useOil() {
+        if (((int) oil) <= 0) {
+            return false;
+        }
+        oil -= 0.01;
         return true;
     }
 
@@ -103,8 +133,29 @@ public class ScoreBoard {
         }
         //计分
         textPaint.setTextSize(32);
-        canvas.drawText("Score", 32, 1 * maxH / 5, textPaint);
-        canvas.drawText(": " + score, 120, 1 * maxH / 5, textPaint);
+        canvas.drawText("sc", 32, 1 * maxH / 5, textPaint);
+        canvas.drawText(": " + score, 72, 1 * maxH / 5, textPaint);
+
+        //弹药
+        if (imageBoomDesRect == null) {
+            imageBoomDesRect = new Rect(32, (int) (1.5 * maxH / 5), imageBomb.getWidth() + 32, imageBomb.getHeight() + (int) (1.5 * maxH / 5));
+        }
+        canvas.drawBitmap(imageBomb, null, imageBoomDesRect, null);
+        canvas.drawText(": " + boom, 72, 2 * maxH / 5, textPaint);
+
+        //燃油
+        if (imageOilDesRect == null) {
+            imageOilDesRect = new Rect(32, (int) (2.5 * maxH / 5), imageOil.getWidth() + 32, imageOil.getHeight() + (int) (2.5 * maxH / 5));
+        }
+        canvas.drawBitmap(imageOil, null, imageOilDesRect, null);
+        canvas.drawText(": " + ((int) oil), 72, 3 * maxH / 5, textPaint);
+
+        //食物
+        if (imageFoodDesRect == null) {
+            imageFoodDesRect = new Rect(32, (int) (3.5 * maxH / 5), imageFood.getWidth() + 32, imageFood.getHeight() + (int) (3.5 * maxH / 5));
+        }
+        canvas.drawBitmap(imageFood, null, imageFoodDesRect, null);
+        canvas.drawText(": " + food, 72, 4 * maxH / 5, textPaint);
 
 
     }
